@@ -3,6 +3,8 @@ Mongoose Fuzzy Searching
 
 mongoose-fuzzy-searching is simple and lightweight plugin that enables fuzzy searching in documents in MongoDB.
 
+[![Build Status](https://travis-ci.com/VassilisPallas/mongoose-fuzzy-searching.svg?token=iwmbqGL1Zp9rkA7hmQ6P&branch=master)](https://travis-ci.com/VassilisPallas/mongoose-fuzzy-searching)
+
 ## Installation
 Install using [npm](https://npmjs.org)
 
