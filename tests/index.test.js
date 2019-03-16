@@ -1,0 +1,137 @@
+var chai = require('chai');
+var expect = chai.expect;
+var chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised);
+
+var rewire = require('rewire');
+var plugin = rewire('../index');
+
+describe('nGrams', function () {
+    var nGrams;
+
+    beforeEach(function () {
+        nGrams = plugin.__get__('nGrams');
+    });
+
+    afterEach(function () {
+        plugin = rewire('../index');
+    });
+
+    context('with default minSize', function () {
+        it('should return empty array without attribute', function () {
+            expect(nGrams()).to.be.empty;
+        });
+
+        it('should return empty array with attribute `a`', function () {
+            expect(nGrams('a')).to.be.empty;
+        });
+
+        it('should be equal to `["aa", "aaa"]` if the given text is `aaa`', function () {
+            expect(nGrams('aaa')).to.deep.equal(["aa", "aaa"]);
+        });
+    });
+
+    context('with specific minSize', function () {
+        it('should throw an array because the minSize is negative', function () {
+            expect(nGrams.bind(nGrams, 'aaa', -1)).to.throw();
+        });
+
+        it('should throw an array because the minSize is 0', function () {
+            expect(nGrams.bind(nGrams, 'aaa', 0)).to.throw();
+        });
+
+        it('should return `["aaa"]` because the minSize is 3', function () {
+            expect(nGrams('aaa', 3)).to.deep.equal(["aaa"])
+        });
+    });
+});
+
+describe('replaceSymbols', function () {
+    var replaceSymbols;
+
+    beforeEach(function () {
+        replaceSymbols = plugin.__get__('replaceSymbols');
+    });
+
+    afterEach(function () {
+        plugin = rewire('../index');
+    });
+
+    it('should return `hello world` because the given string is `hello_world`', function () {
+        expect(replaceSymbols('hello_world')).to.equal('hello world')
+    });
+
+    it('should return `exampledomaincom` because the given string is `example@domain.com`', function () {
+        expect(replaceSymbols('example@domain.com', true)).to.equal('exampledomaincom')
+    });
+
+    it('should return `example@domain.com` because the given string is `example@domain.com`', function () {
+        expect(replaceSymbols('example@domain.com')).to.equal('example@domain.com')
+    });
+});
+
+describe('isObject', function () {
+    var isObject;
+
+    beforeEach(function () {
+        isObject = plugin.__get__('isObject');
+    });
+
+    afterEach(function () {
+        plugin = rewire('../index');
+    });
+
+    it('should return false because the parameter is array', function () {
+        expect(isObject([])).to.be.false;
+    });
+
+    it('should return false because the parameter is undefined', function () {
+        expect(isObject()).to.be.false;
+    });
+
+    it('should return false because object is empty', function () {
+        expect(isObject({})).to.be.false;
+    });
+
+    it('should return true', function () {
+        expect(isObject({name: 'Joe'})).to.be.true;
+    });
+});
+
+describe('fuzzy search', function () {
+    context('', function () {
+        var schema = {
+            add: function () {
+            },
+            index: function () {
+            },
+            set: function () {
+            },
+            pre: function () {
+            },
+            statics: []
+        };
+
+        it('should throw an Error because the options attribute is undefined', function () {
+            expect(plugin.bind(this)).to.throw(Error)
+        });
+
+        it('should throw an Error because the fields option is undefined', function () {
+            expect(plugin.bind(this, schema, {})).to.throw(Error)
+        });
+
+        it('should throw an Error because the fields option is not an array', function () {
+            expect(plugin.bind(this, schema, {fields: '123'})).to.throw(TypeError)
+        });
+
+        it("should return TypeError because keys is not a String or an Array", function (done) {
+            expect(plugin.bind(this, schema, {
+                fields: [{
+                    keys: function () {
+                    }
+                }]
+            })).to.throw(TypeError);
+            done();
+        });
+    });
+});

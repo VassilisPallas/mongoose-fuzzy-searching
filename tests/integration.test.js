@@ -1,0 +1,294 @@
+var chai = require('chai');
+var expect = chai.expect;
+var chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised);
+
+var fuzzy_searching = require('../');
+var mongoose = require('mongoose'),
+    Schema = mongoose.Schema;
+
+before(function (done) {
+    mongoose.Promise = global.Promise;
+    mongoose.set('useCreateIndex', true);
+    mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/fuzzy-test', {
+        useNewUrlParser: true,
+    });
+    done();
+});
+
+after(function (done) {
+    mongoose.disconnect();
+    done();
+});
+
+describe('mongoose_fuzzy_searching without the right options', function () {
+    var schema = new Schema({name: String}, {collection: 'fuzzy_searching_test_1'});
+    schema.plugin(fuzzy_searching, {
+        fields: [
+            {
+                name: "name",
+                minSize: 2
+            }
+        ]
+    });
+
+    var User1 = mongoose.model('User1', schema);
+
+    before(function (done) {
+        var user = new User1({name: 'Joe'});
+
+        user.save(function () {
+            done();
+        });
+    });
+
+    after(function (done) {
+        mongoose.connection.dropCollection("fuzzy_searching_test_1", function () {
+            done();
+        });
+    });
+
+    context('Error handling', function () {
+        it("fuzzySearch() -> should return an TypeError because the first argument is undefined", function (done) {
+            expect(User1.fuzzySearch.bind(this)).to.throw(TypeError);
+            done();
+        });
+
+        it("fuzzySearch() -> should return an TypeError because the first argument is a function", function (done) {
+            expect(User1.fuzzySearch.bind(this, function (err, user) {
+            })).to.throw(TypeError);
+            done();
+        });
+    });
+});
+
+describe('mongoose_fuzzy_searching without options and callback', function () {
+    var schema = new Schema({name: String}, {collection: 'fuzzy_searching_test_2'});
+    schema.plugin(fuzzy_searching, {
+        fields: [
+            {
+                name: "name",
+                minSize: 2
+            }
+        ]
+    });
+
+    var User2 = mongoose.model('User2', schema);
+
+    before(function (done) {
+        var user = new User2({name: 'Joe'});
+
+        user.save(function () {
+            done();
+        });
+    });
+
+    after(function (done) {
+        mongoose.connection.dropCollection("fuzzy_searching_test_2", function () {
+            done();
+        });
+    });
+
+    it("fuzzySearch() -> should return Promise", function (done) {
+        var result = User2.fuzzySearch('jo');
+        expect(result).to.have.property('then');
+        done();
+    });
+
+    it("fuzzySearch() -> should find one user with string as first parameter", function (done) {
+        User2.fuzzySearch('jo').then(result => {
+            expect(result).to.have.lengthOf(1);
+            done();
+        }).catch(err => {
+            done(err)
+        });
+    });
+
+    it("fuzzySearch() -> should find one user with object as first parameter", function (done) {
+        User2.fuzzySearch({query: 'jo'}).then(result => {
+            expect(result).to.have.lengthOf(1);
+            done();
+        }).catch(err => {
+            done(err);
+        });
+    });
+});
+
+describe('mongoose_fuzzy_searching with options and without callback', function () {
+    var schema = new Schema({name: String, lastName: String}, {collection: 'fuzzy_searching_test_3'});
+    schema.plugin(fuzzy_searching, {
+        fields: [
+            {
+                name: "name",
+                minSize: 2
+            }
+        ]
+    });
+
+    var User3 = mongoose.model('User3', schema);
+
+    before(function (done) {
+        var user = new User3({name: 'Joe', lastName: 'Doe'});
+
+        user.save(function () {
+            done();
+        });
+    });
+
+    after(function (done) {
+        mongoose.connection.dropCollection("fuzzy_searching_test_3", function () {
+            done();
+        });
+    });
+
+    it("fuzzySearch() -> should not be able to find users because the options searches for `lastName` with value `test`", function (done) {
+        User3.fuzzySearch('jo', {lastName: 'test'}).then(result => {
+            expect(result).to.have.lengthOf(0);
+            done();
+        }).catch(err => {
+            done(err)
+        });
+    });
+
+    it("fuzzySearch() -> should be able to find users because the options searches for `lastName` with value `Doe`", function (done) {
+        User3.fuzzySearch('jo', {lastName: 'Doe'}).then(result => {
+            expect(result).to.have.lengthOf(1);
+            done();
+        }).catch(err => {
+            done(err)
+        });
+    });
+});
+
+describe('mongoose_fuzzy_searching with callback and without options', function () {
+    var schema = new Schema({name: String}, {collection: 'fuzzy_searching_test_4'});
+    schema.plugin(fuzzy_searching, {
+        fields: [
+            {
+                name: "name",
+                minSize: 2
+            }
+        ]
+    });
+
+    var User4 = mongoose.model('User4', schema);
+
+    before(function (done) {
+        var user = new User4({name: 'Joe'});
+
+        user.save(function () {
+            done();
+        });
+    });
+
+    after(function (done) {
+        mongoose.connection.dropCollection("fuzzy_searching_test_4", function () {
+            done();
+        });
+    });
+
+    it("fuzzySearch() -> should return the results with callback", function (done) {
+        User4.fuzzySearch('jo', function (err, doc) {
+            expect(err).to.be.null;
+            expect(doc).to.have.lengthOf(1);
+            done(err);
+        })
+    });
+});
+
+describe('mongoose_fuzzy_searching with options and callback', function () {
+    var schema = new Schema({name: String, lastName: String}, {collection: 'fuzzy_searching_test_5'});
+    schema.plugin(fuzzy_searching, {
+        fields: [
+            {
+                name: "name",
+                minSize: 2
+            }
+        ]
+    });
+
+    var User5 = mongoose.model('User5', schema);
+
+    before(function (done) {
+        var user = new User5({name: 'Joe', lastName: 'Doe'});
+
+        user.save(function () {
+            done();
+        });
+    });
+
+    after(function (done) {
+        mongoose.connection.dropCollection("fuzzy_searching_test_5", function () {
+            done();
+        });
+    });
+
+    it("fuzzySearch() -> should not be able to find users because the options searches for `lastName` with value `test` and return the result with callback", function (done) {
+        User5.fuzzySearch('jo', {lastName: 'test'}, function (err, doc) {
+            expect(err).to.be.null;
+            expect(doc).to.have.lengthOf(0);
+            done(err);
+        });
+    });
+
+    it("fuzzySearch() -> should not be able to find users because the options searches for `lastName` with value `Doe` and return the result with callback", function (done) {
+        User5.fuzzySearch('jo', {lastName: 'Doe'}, function (err, doc) {
+            expect(err).to.be.null;
+            expect(doc).to.have.lengthOf(1);
+            done(err);
+        });
+    });
+});
+
+describe('mongoose_fuzzy_searching with `keys` key', function () {
+    var schema = new Schema({
+        texts: [{
+            title: String,
+            description: String,
+            language: String
+        }]
+    }, {collection: 'fuzzy_searching_test_6'});
+
+    schema.plugin(fuzzy_searching, {
+        fields: [
+            {
+                name: 'texts',
+                escapeSpecialCharacters: false,
+                keys: ["title", "language"]
+            }
+        ]
+    });
+
+    var User6 = mongoose.model('User6', schema);
+
+    before(function (done) {
+        var user = new User6({
+            texts: [
+                {
+                    title: 'this is a title',
+                    description: 'descr!',
+                    language: 'en'
+                }
+            ]
+        });
+
+        user.save(function (err) {
+            done();
+        });
+    });
+
+    after(function (done) {
+        mongoose.connection.dropCollection("fuzzy_searching_test_6", function () {
+            done();
+        });
+    });
+
+    it("fuzzySearch() -> should be able to find the title because the text is `this is`", function (done) {
+        User6.fuzzySearch('this is').then(function (result){
+            expect(result).to.have.lengthOf(1);
+            done();
+        }).catch(err => {
+            done(err)
+        });
+    });
+});

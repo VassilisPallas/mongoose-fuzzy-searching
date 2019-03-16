@@ -1,0 +1,35 @@
+{
+  "name": "mongoose-fuzzy-searching",
+  "version": "0.0.0",
+  "author": "Vassilis Pallas <vspallas@gmail.com>",
+  "description": "Mongoose fuzzy searching plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "nyc mocha --reporter spec ./tests/*"
+  },
+  "keywords": [
+    "mongoose",
+    "fuzzy",
+    "searching",
+    "search",
+    "plugin",
+    "mongo",
+    "mongodb"
+  ],
+  "bugs": {
+    "url": "https://github.com/VassilisPallas/mongoose-fuzzy-searching/issues"
+  },
+  "homepage": "https://github.com/VassilisPallas/mongoose-fuzzy-searching",
+  "license": "MIT",
+  "peerDependencies": {
+    "mongoose": "4.x || 5.x"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^6.0.2",
+    "mongoose": "^5.4.16",
+    "nyc": "^13.3.0",
+    "rewire": "^4.0.1"
+  }
+}
