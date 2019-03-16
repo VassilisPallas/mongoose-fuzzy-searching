@@ -4,6 +4,12 @@ var mongoose = require('mongoose');
 var Model = mongoose.Model;
 var replaceLanguageCharacters = require('./languageCharacters');
 
+/**
+ * Creates sequence of characters taken from the given string.
+ * @param {string} text - The string for the sequence.
+ * @param {number} minSize - Lower limit to start creating sequence. Default size is 2.
+ * @return {Array} The sequence of characters in Array of Strings.
+ */
 function nGrams(text, minSize) {
     if (minSize === undefined || minSize === null) {
         minSize = 2;
@@ -39,6 +45,12 @@ function nGrams(text, minSize) {
     return Array.from(set);
 }
 
+/**
+ * Removes special symbols from string.
+ * @param {string} text - The string to remove the characters.
+ * @param {boolean} escapeSpecialCharacters - If this value is true, it will also remove all the special characters.
+ * @return {string} the given text without the special characters.
+ */
 function replaceSymbols(text, escapeSpecialCharacters) {
     text = text.toLowerCase();
     if (escapeSpecialCharacters) {
@@ -56,8 +68,24 @@ function createSchemaObject(typeValue, options) {
     return options;
 }
 
+/**
+ * Returns if the variable is an object and if the the object is empty
+ * @param {object} obj
+ * @return {boolean}
+ */
 function isObject(obj) {
     return !!obj && obj.constructor === Object && Object.keys(obj).length > 0;
+}
+
+/**
+ * Converts Object to Array
+ * @param {object} object - Object to convert
+ * @return {array}
+ */
+function objectToValuesPolyfill(object) {
+    return Object.keys(object).map(function (key) {
+        return object[key];
+    });
 }
 
 /* istanbul ignore next */
@@ -69,6 +97,12 @@ function addToSchema(name) {
         })
     };
 }
+
+/**
+ * Add the fields to the collection
+ * @param {object} schema - The mongoose schema
+ * @param {array} fields - The fields to add to the collection
+ */
 
 /* istanbul ignore next */
 function createFields(schema, fields) {
@@ -94,6 +128,12 @@ function createFields(schema, fields) {
 
     schema.index(indexes);
 }
+
+/**
+ * Creates nGrams for the documents
+ * @param {object} attributes - Schema attributes
+ * @param {array} fields
+ */
 
 /* istanbul ignore next */
 function createNGrams(attributes, fields) {
@@ -122,6 +162,11 @@ function createNGrams(attributes, fields) {
     });
 }
 
+/**
+ * Removes fuzzy keys from the document
+ * @param {array} fields - the fields to remove
+ */
+
 /* istanbul ignore next */
 function removeFuzzyElements(fields) {
     return function (doc, ret, opt) {
@@ -136,6 +181,12 @@ function removeFuzzyElements(fields) {
     }
 }
 
+/**
+ * Plugin's main function. Creates the fuzzy fields on the collection, set's a pre save middleware to create the Ngrams for the fuzzy fields
+ * and creates the instance methods `fuzzySearch` which finds the guesses.
+ * @param {object} schema - Mongo Collection
+ * @param {object} options - plugin options
+ */
 module.exports = function (schema, options) {
     if (!options || (options && !options.fields)) {
         throw new Error('You must set at least one field for fuzzy search.');
@@ -167,6 +218,8 @@ module.exports = function (schema, options) {
     });
 
     schema.statics['fuzzySearch'] = function () {
+        Object.values = Object.values || objectToValuesPolyfill;
+
         var args = Object.values(arguments);
 
         if (args.length === 0 && (typeof args[0] !== 'string' || !isObject(args[0]))) {

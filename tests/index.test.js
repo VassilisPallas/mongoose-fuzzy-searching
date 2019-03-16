@@ -98,6 +98,26 @@ describe('isObject', function () {
     });
 });
 
+describe('objectToValuesPolyfill', function () {
+    var objectToValuesPolyfill;
+
+    beforeEach(function () {
+        objectToValuesPolyfill = plugin.__get__('objectToValuesPolyfill');
+    });
+
+    afterEach(function () {
+        plugin = rewire('../index');
+    });
+
+    it('should return an empty array', function () {
+        expect(objectToValuesPolyfill({})).to.have.lengthOf(0);
+    });
+
+    it('should return false because the parameter is undefined', function () {
+        expect(objectToValuesPolyfill({'0': 'test'})).to.have.lengthOf(1);
+    });
+});
+
 describe('fuzzy search', function () {
     context('', function () {
         var schema = {
