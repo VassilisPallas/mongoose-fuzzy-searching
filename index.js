@@ -77,6 +77,17 @@ function isObject(obj) {
     return !!obj && obj.constructor === Object && Object.keys(obj).length > 0;
 }
 
+/**
+ * Converts Object to Array
+ * @param {object} object - Object to convert
+ * @return {array}
+ */
+function objectToValuesPolyfill(object) {
+    return Object.keys(object).map(function (key) {
+        return object[key];
+    });
+}
+
 /* istanbul ignore next */
 function addToSchema(name) {
     return {
@@ -92,6 +103,7 @@ function addToSchema(name) {
  * @param {object} schema - The mongoose schema
  * @param {array} fields - The fields to add to the collection
  */
+
 /* istanbul ignore next */
 function createFields(schema, fields) {
     var indexes = {};
@@ -122,6 +134,7 @@ function createFields(schema, fields) {
  * @param {object} attributes - Schema attributes
  * @param {array} fields
  */
+
 /* istanbul ignore next */
 function createNGrams(attributes, fields) {
     fields.forEach(item => {
@@ -153,6 +166,7 @@ function createNGrams(attributes, fields) {
  * Removes fuzzy keys from the document
  * @param {array} fields - the fields to remove
  */
+
 /* istanbul ignore next */
 function removeFuzzyElements(fields) {
     return function (doc, ret, opt) {
@@ -204,6 +218,8 @@ module.exports = function (schema, options) {
     });
 
     schema.statics['fuzzySearch'] = function () {
+        Object.values = Object.values || objectToValuesPolyfill;
+
         var args = Object.values(arguments);
 
         if (args.length === 0 && (typeof args[0] !== 'string' || !isObject(args[0]))) {
