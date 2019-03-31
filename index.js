@@ -229,6 +229,11 @@ module.exports = function (schema, options) {
         next();
     });
 
+    schema.pre('findOneAndUpdate', function (next) {
+        createNGrams(this, options.fields);
+        next();
+    });
+
     schema.statics['fuzzySearch'] = function () {
         Object.values = Object.values || objectToValuesPolyfill;
 
