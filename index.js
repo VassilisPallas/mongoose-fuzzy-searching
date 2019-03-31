@@ -214,7 +214,7 @@ module.exports = function (schema, options) {
     });
 
     schema.set('toJSON', {
-        transform: removeFuzzyElements(options.fields)
+        transform: removeFuzzyElements(options.fields),
         getters: true,
         setters: true
     });
