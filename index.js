@@ -225,12 +225,12 @@ module.exports = function (schema, options) {
     });
 
     schema.pre('update', function (next) {
-        createNGrams(this, options.fields);
+        createNGrams(this._update, options.fields);
         next();
     });
 
     schema.pre('findOneAndUpdate', function (next) {
-        createNGrams(this, options.fields);
+        createNGrams(this._update, options.fields);
         next();
     });
 
