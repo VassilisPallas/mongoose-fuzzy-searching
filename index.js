@@ -138,24 +138,27 @@ function createFields(schema, fields) {
 /* istanbul ignore next */
 function createNGrams(attributes, fields) {
     fields.forEach(item => {
+        var attr = null;
         if (typeof item === 'string' || item instanceof String) {
-            attributes[`${item}_fuzzy`] = nGrams(replaceSymbols(attributes[item], true));
+            attr = attributes[item] || '';
+            attributes[`${item}_fuzzy`] = nGrams(replaceSymbols(attr, true));
         } else if (isObject(item)) {
             var escapeSpecialCharacters = item.escapeSpecialCharacters !== false;
-
             if (item.keys) {
                 item.keys.forEach(key => {
+                    var attr = attributes[item.name] && attributes[item.name][0] && attributes[item.name][0][key] ? attributes[item.name][0][key] : '';
                     if (item.minSize) {
-                        attributes[`${item.name}_fuzzy`][`${key}_fuzzy`] = nGrams(replaceSymbols(attributes[item.name][0][key], escapeSpecialCharacters), item.minSize)
+                        attributes[`${item.name}_fuzzy`][`${key}_fuzzy`] = nGrams(replaceSymbols(attr, escapeSpecialCharacters), item.minSize)
                     } else {
-                        attributes[`${item.name}_fuzzy`][`${key}_fuzzy`] = nGrams(replaceSymbols(attributes[item.name][0][key], escapeSpecialCharacters))
+                        attributes[`${item.name}_fuzzy`][`${key}_fuzzy`] = nGrams(replaceSymbols(attr, escapeSpecialCharacters))
                     }
                 });
             } else {
+                attr = attributes[item.name] || '';
                 if (item.minSize) {
-                    attributes[`${item.name}_fuzzy`] = nGrams(replaceSymbols(attributes[item.name], escapeSpecialCharacters), item.minSize);
+                    attributes[`${item.name}_fuzzy`] = nGrams(replaceSymbols(attr, escapeSpecialCharacters), item.minSize);
                 } else {
-                    attributes[`${item.name}_fuzzy`] = nGrams(replaceSymbols(attributes[item.name], escapeSpecialCharacters));
+                    attributes[`${item.name}_fuzzy`] = nGrams(replaceSymbols(attr, escapeSpecialCharacters));
                 }
             }
         }
@@ -205,14 +208,23 @@ module.exports = function (schema, options) {
     createFields(schema, options.fields);
 
     schema.set('toObject', {
-        transform: removeFuzzyElements(options.fields)
+        transform: removeFuzzyElements(options.fields),
+        getters: true,
+        setters: true
     });
 
     schema.set('toJSON', {
-        transform: removeFuzzyElements(options.fields)
+        transform: removeFuzzyElements(options.fields),
+        getters: true,
+        setters: true
     });
 
     schema.pre('save', function (next) {
+        createNGrams(this, options.fields);
+        next();
+    });
+
+    schema.pre('update', function (next) {
         createNGrams(this, options.fields);
         next();
     });
