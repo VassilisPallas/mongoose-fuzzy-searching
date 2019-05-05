@@ -229,7 +229,7 @@ module.exports = function (schema, options) {
     });
 
     schema.statics['fuzzySearch'] = function () {
-        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!')
+
         Object.values = Object.values || objectToValuesPolyfill;
 
         var args = Object.values(arguments);

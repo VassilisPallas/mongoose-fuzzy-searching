@@ -17,8 +17,9 @@ before(function (done) {
 });
 
 after(function (done) {
-    mongoose.disconnect();
-    done();
+    mongoose.disconnect(function () {
+        done();
+    });
 });
 
 describe('mongoose_fuzzy_searching without the right options', function () {
@@ -284,11 +285,119 @@ describe('mongoose_fuzzy_searching with `keys` key', function () {
     });
 
     it("fuzzySearch() -> should be able to find the title because the text is `this is`", function (done) {
-        User6.fuzzySearch('this is').then(function (result){
+        User6.fuzzySearch('this is').then(function (result) {
             expect(result).to.have.lengthOf(1);
             done();
         }).catch(err => {
             done(err)
+        });
+    });
+});
+
+describe('mongoose_fuzzy_searching update user with `findOneAndUpdate`', function () {
+    var schema = new Schema({name: String}, {collection: 'fuzzy_searching_test_7'});
+    schema.plugin(fuzzy_searching, {
+        fields: [
+            {
+                name: "name",
+                minSize: 2
+            }
+        ]
+    });
+
+    var User7 = mongoose.model('User7', schema);
+
+    before(function (done) {
+        var user = new User7({name: 'Joe'});
+
+        user.save(function () {
+            User7.findOneAndUpdate(user._id, {name: 'Someone'}, function () {
+                done();
+            });
+        });
+    });
+
+    after(function (done) {
+        mongoose.connection.dropCollection("fuzzy_searching_test_7", function () {
+            done();
+        });
+    });
+
+    it("fuzzySearch() -> should return Promise", function (done) {
+        var result = User7.fuzzySearch('some');
+        expect(result).to.have.property('then');
+        done();
+    });
+
+    it("fuzzySearch() -> should find one user with string as first parameter", function (done) {
+        User7.fuzzySearch('some').then(result => {
+            expect(result).to.have.lengthOf(1);
+            done();
+        }).catch(err => {
+            done(err)
+        });
+    });
+
+    it("fuzzySearch() -> should find one user with object as first parameter", function (done) {
+        User7.fuzzySearch({query: 'some'}).then(result => {
+            expect(result).to.have.lengthOf(1);
+            done();
+        }).catch(err => {
+            done(err);
+        });
+    });
+});
+
+describe('mongoose_fuzzy_searching update user with `update`', function () {
+    var schema = new Schema({name: String}, {collection: 'fuzzy_searching_test_8'});
+    schema.plugin(fuzzy_searching, {
+        fields: [
+            {
+                name: "name",
+                minSize: 2
+            }
+        ]
+    });
+
+    var User8 = mongoose.model('User8', schema);
+
+    before(function (done) {
+        var user = new User8({name: 'Joe'});
+
+        user.save(function () {
+            User8.update({_id: user._id}, {name: 'Someone'}, function () {
+                done();
+            });
+        });
+    });
+
+    after(function (done) {
+        mongoose.connection.dropCollection("fuzzy_searching_test_8", function () {
+            done();
+        });
+    });
+
+    it("fuzzySearch() -> should return Promise", function (done) {
+        var result = User8.fuzzySearch('some');
+        expect(result).to.have.property('then');
+        done();
+    });
+
+    it("fuzzySearch() -> should find one user with string as first parameter", function (done) {
+        User8.fuzzySearch('some').then(result => {
+            expect(result).to.have.lengthOf(1);
+            done();
+        }).catch(err => {
+            done(err)
+        });
+    });
+
+    it("fuzzySearch() -> should find one user with object as first parameter", function (done) {
+        User8.fuzzySearch({query: 'some'}).then(result => {
+            expect(result).to.have.lengthOf(1);
+            done();
+        }).catch(err => {
+            done(err);
         });
     });
 });
