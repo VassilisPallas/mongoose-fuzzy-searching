@@ -28,7 +28,7 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "mocha": "^6.0.2",
-    "mongoose": "^5.4.16",
+    "mongoose": "^5.5.2",
     "nyc": "^13.3.0",
     "rewire": "^4.0.1"
   }

@@ -11,7 +11,7 @@ var replaceLanguageCharacters = require('./languageCharacters');
  * @return {Array} The sequence of characters in Array of Strings.
  */
 function nGrams(text, minSize) {
-    if (minSize === undefined || minSize === null) {
+    if (minSize == null) {
         minSize = 2;
     }
 
@@ -229,6 +229,7 @@ module.exports = function (schema, options) {
     });
 
     schema.statics['fuzzySearch'] = function () {
+        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!')
         Object.values = Object.values || objectToValuesPolyfill;
 
         var args = Object.values(arguments);
@@ -239,7 +240,7 @@ module.exports = function (schema, options) {
 
         var queryString = isObject(args[0]) ? args[0].query : args[0];
 
-        var query = nGrams(replaceSymbols(queryString));
+        var query = nGrams(replaceSymbols(queryString)).join(',');
         var options = null;
         var callback = null;
 
@@ -266,6 +267,7 @@ module.exports = function (schema, options) {
             }
         }
 
-        return Model['find'].apply(this, [callback]).where(search);
+        // return Model['find'].apply(this, [callback]).where(search);
+        return Model['find'].apply(this, [null, {confidenceScore: {$meta: "textScore"}}, callback]).where(search);
     };
 };
