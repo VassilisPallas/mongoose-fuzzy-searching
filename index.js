@@ -257,17 +257,16 @@ module.exports = function (schema, options) {
         var search;
 
         if (!options) {
-            search = {$text: {$search: query}}
+            search = { $text: { $search: query } }
         } else {
             search = {
                 $and: [
-                    {$text: {$search: query}},
+                    { $text: { $search: query } },
                     options
                 ]
             }
         }
 
-        // return Model['find'].apply(this, [callback]).where(search);
-        return Model['find'].apply(this, [null, {confidenceScore: {$meta: "textScore"}}, callback]).where(search);
+        return Model['find'].apply(this, [null, { confidenceScore: { $meta: "textScore" } }, { sort: { confidenceScore: { $meta: "textScore" } } }, callback]).where(search);
     };
 };
