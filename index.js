@@ -69,6 +69,10 @@ function nGrams(text, minSize, prefixOnly) {
  * @return {Array} The sequence of characters in Array of Strings.
  */
 function makeNGrams(text, escapeSpecialCharacters, minSize, prefixOnly) {
+    if (!text) {
+        return [];
+    }
+
     var result = text
         .split(' ')
         .map(function (q) {

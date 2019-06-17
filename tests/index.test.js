@@ -29,19 +29,61 @@ describe('nGrams', function () {
         it('should be equal to `["aa", "aaa"]` if the given text is `aaa`', function () {
             expect(nGrams('aaa')).to.deep.equal(["aa", "aaa"]);
         });
+
+        it('should be equal to `["23", "12", "123"]` if the given text is 123 (as a number)', function () {
+            expect(nGrams(123)).to.deep.equal(["23", "12", "123"]);
+        });
     });
 
     context('with specific minSize', function () {
-        it('should throw an array because the minSize is negative', function () {
+        it('should throw an Error because the minSize is negative', function () {
             expect(nGrams.bind(nGrams, 'aaa', -1)).to.throw();
         });
 
-        it('should throw an array because the minSize is 0', function () {
+        it('should throw an Error because the minSize is 0', function () {
             expect(nGrams.bind(nGrams, 'aaa', 0)).to.throw();
         });
 
         it('should return `["aaa"]` because the minSize is 3', function () {
             expect(nGrams('aaa', 3)).to.deep.equal(["aaa"])
+        });
+
+        it('should return `["aaa","aaaa", "aaaaa"]` because the minSize is 3 and prefixOnly to true', function () {
+            expect(nGrams('aaaaa', 3, true)).to.deep.equal(["aaa", "aaaa", "aaaaa"])
+        });
+    });
+});
+
+describe('makeNGrams', function () {
+    var makeNGrams;
+
+    beforeEach(function () {
+        makeNGrams = plugin.__get__('makeNGrams');
+    });
+
+    afterEach(function () {
+        plugin = rewire('../index');
+    });
+
+    context('with default minSize', function () {
+        it('should return empty array without attribute', function () {
+            expect(makeNGrams()).to.be.empty;
+        });
+
+        it('should return `["oe", "jo", "joe", "do", "doe"]` with attribute `Joe Doe`', function () {
+            expect(makeNGrams('Joe Doe')).to.deep.equal(['oe', 'jo', 'joe', 'do', 'doe']);
+        });
+    });
+
+    context('with specific `minSize`', function () {
+        it('should return `["joe", "doe"]` because the minSize is 3', function () {
+            expect(makeNGrams('Joe Doe', false, 3)).to.deep.equal(["joe", "doe"]);
+        });
+    });
+
+    context('with `prefixOnly`', function () {
+        it('should return `["joe", "doe"]` because the minSize is 3', function () {
+            expect(makeNGrams('Joe Doe', false, 2, false)).to.deep.equal(['oe', 'jo', 'joe', 'do', 'doe']);
         });
     });
 });
@@ -94,7 +136,7 @@ describe('isObject', function () {
     });
 
     it('should return true', function () {
-        expect(isObject({name: 'Joe'})).to.be.true;
+        expect(isObject({ name: 'Joe' })).to.be.true;
     });
 });
 
@@ -114,7 +156,7 @@ describe('objectToValuesPolyfill', function () {
     });
 
     it('should return false because the parameter is undefined', function () {
-        expect(objectToValuesPolyfill({'0': 'test'})).to.have.lengthOf(1);
+        expect(objectToValuesPolyfill({ '0': 'test' })).to.have.lengthOf(1);
     });
 });
 
@@ -141,7 +183,7 @@ describe('fuzzy search', function () {
         });
 
         it('should throw an Error because the fields option is not an array', function () {
-            expect(plugin.bind(this, schema, {fields: '123'})).to.throw(TypeError)
+            expect(plugin.bind(this, schema, { fields: '123' })).to.throw(TypeError)
         });
 
         it("should return TypeError because keys is not a String or an Array", function (done) {
