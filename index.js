@@ -4,15 +4,21 @@ var mongoose = require('mongoose');
 var Model = mongoose.Model;
 var replaceLanguageCharacters = require('./languageCharacters');
 
+var constants = {
+    DEFAULT_MIN_SIZE: 2,
+    DEFAULT_PREFIX_ONLY: false
+}
+
 /**
  * Creates sequence of characters taken from the given string.
  * @param {string} text - The string for the sequence.
- * @param {number} minSize - Lower limit to start creating sequence. Default size is 2.
+ * @param {number} minSize - Lower limit to start creating sequence.
+ * @param {boolean} prefixOnly -Only return ngrams from start of word.
  * @return {Array} The sequence of characters in Array of Strings.
  */
-function nGrams(text, minSize) {
+function nGrams(text, minSize, prefixOnly) {
     if (minSize == null) {
-        minSize = 2;
+        minSize = constants.DEFAULT_MIN_SIZE;
     }
 
     var set = new Set();
@@ -27,10 +33,19 @@ function nGrams(text, minSize) {
     }
 
     text = text.slice ? text.toLowerCase() : String(text);
-    index = text.length - minSize + 1;
+    index = prefixOnly ? 0 : text.length - minSize + 1;
 
-    if (index < 1) {
+    if (!prefixOnly && index < 1) {
         return [];
+    }
+
+    if (prefixOnly) {
+        while (minSize < text.length + 1) {
+            set.add(text.slice(index, index + minSize));
+            minSize++;
+        }
+
+        return Array.from(set);
     }
 
     while (minSize <= text.length + 1) {
@@ -43,6 +58,26 @@ function nGrams(text, minSize) {
     }
 
     return Array.from(set);
+}
+
+/**
+ * Creates sequence of each word from the given string.
+ * @param {string} text - The string for the sequence.
+ * @param {boolean} escapeSpecialCharacters - Escape special characters from the given string.
+ * @param {number} minSize - Lower limit to start creating sequence.
+ * @param {boolean} prefixOnly -Only return ngrams from start of word.
+ * @return {Array} The sequence of characters in Array of Strings.
+ */
+function makeNGrams(text, escapeSpecialCharacters, minSize, prefixOnly) {
+    var result = text
+        .split(' ')
+        .map(function (q) {
+            return nGrams(replaceSymbols(q, escapeSpecialCharacters), minSize || constants.DEFAULT_MIN_SIZE, prefixOnly || constants.DEFAULT_PREFIX_ONLY)
+        })
+        .reduce(function (acc, arr) {
+            return acc.concat(arr);
+        }, []);
+    return Array.from(new Set(result));
 }
 
 /**
@@ -91,7 +126,17 @@ function objectToValuesPolyfill(object) {
 /* istanbul ignore next */
 function addToSchema(name) {
     return {
-        [`${name}_fuzzy`]: createSchemaObject([String], {
+        [`${name}_fuzzy`]: createSchemaObject(String, {
+            default: '',
+            index: false
+        })
+    };
+}
+
+/* istanbul ignore next */
+function addArrayToSchema(name) {
+    return {
+        [`${name}_fuzzy`]: createSchemaObject(mongoose.Schema.Types.Mixed, {
             default: [],
             index: false
         })
@@ -107,26 +152,29 @@ function addToSchema(name) {
 /* istanbul ignore next */
 function createFields(schema, fields) {
     var indexes = {};
-    fields.forEach(item => {
+    var weights = {};
+    fields.forEach(function (item) {
         if (typeof item === 'string' || item instanceof String) {
             schema.add(addToSchema(item));
             indexes[`${item}_fuzzy`] = 'text';
         } else if (isObject(item)) {
             if (item.keys) {
                 item.keys.forEach(key => {
-                    schema.add(addToSchema(`${item.name}_fuzzy.${key}`));
                     indexes[`${item.name}_fuzzy.${key}_fuzzy`] = 'text';
                 });
+                schema.add(addArrayToSchema(item.name));
             } else {
                 schema.add(addToSchema(item.name));
                 indexes[`${item.name}_fuzzy`] = 'text';
+                if (item.weight) {
+                    weights[`${item.name}_fuzzy`] = item.weight;
+                }
             }
         } else {
             throw new TypeError('Fields items must be String or Object.');
         }
     });
-
-    schema.index(indexes);
+    schema.index(indexes, { weights });
 }
 
 /**
@@ -137,27 +185,23 @@ function createFields(schema, fields) {
 
 /* istanbul ignore next */
 function createNGrams(attributes, fields) {
-    fields.forEach(item => {
+    fields.forEach(function (item) {
         if (attributes[item] && (typeof item === 'string' || item instanceof String)) {
-            attributes[`${item}_fuzzy`] = nGrams(replaceSymbols(attributes[item], true));
+            attributes[`${item}_fuzzy`] = makeNGrams(attributes[item]).join(' ');
         } else if (isObject(item)) {
             var escapeSpecialCharacters = item.escapeSpecialCharacters !== false;
             if (item.keys) {
-                item.keys.forEach(key => {
-                    var attr = attributes[item.name] && attributes[item.name][0] && attributes[item.name][0][key] ? attributes[item.name][0][key] : null;
-
-                    if (attr && item.minSize) {
-                        attributes[`${item.name}_fuzzy`][`${key}_fuzzy`] = nGrams(replaceSymbols(attr, escapeSpecialCharacters), item.minSize);
-                    } else if (attr && !item.minSize) {
-                        attributes[`${item.name}_fuzzy`][`${key}_fuzzy`] = nGrams(replaceSymbols(attr, escapeSpecialCharacters));
-                    }
+                var attrs = [];
+                attributes[item.name].forEach(function (data) {
+                    var obj = {};
+                    item.keys.forEach(function (key, index) {
+                        obj = Object.assign({}, obj, { [`${key}_fuzzy`]: makeNGrams(data[key], escapeSpecialCharacters, item.minSize, item.prefixOnly).join(' ') });
+                    });
+                    attrs.push(obj);
                 });
+                attributes[`${item.name}_fuzzy`] = attrs;
             } else {
-                if (attributes[item.name] && item.minSize) {
-                    attributes[`${item.name}_fuzzy`] = nGrams(replaceSymbols(attributes[item.name], escapeSpecialCharacters), item.minSize);
-                } else if (attributes[item.name] && !item.minSize) {
-                    attributes[`${item.name}_fuzzy`] = nGrams(replaceSymbols(attributes[item.name], escapeSpecialCharacters));
-                }
+                attributes[`${item.name}_fuzzy`] = makeNGrams(attributes[item.name], escapeSpecialCharacters, item.minSize, item.prefixOnly).join(' ');
             }
         }
     });
@@ -171,7 +215,7 @@ function createNGrams(attributes, fields) {
 /* istanbul ignore next */
 function removeFuzzyElements(fields) {
     return function (doc, ret, opt) {
-        fields.forEach(item => {
+        fields.forEach(function (item) {
             if (typeof item === 'string' || item instanceof String) {
                 delete ret[`${item}_fuzzy`];
             } else if (isObject(item)) {
@@ -197,7 +241,7 @@ module.exports = function (schema, options) {
         throw new TypeError('Fields must be an array.');
     }
 
-    options.fields.forEach(item => {
+    options.fields.forEach(function (item) {
         if (isObject(item) && item.keys && (!Array.isArray(item.keys) && typeof item.keys !== 'string')) {
             throw new TypeError('Key must be an array or a string.');
         }
@@ -240,7 +284,7 @@ module.exports = function (schema, options) {
 
         var queryString = isObject(args[0]) ? args[0].query : args[0];
 
-        var query = nGrams(replaceSymbols(queryString)).join(',');
+        var query = makeNGrams(queryString, false, constants.DEFAULT_MIN_SIZE, true).join(' ');
         var options = null;
         var callback = null;
 

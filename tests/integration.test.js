@@ -23,7 +23,7 @@ after(function (done) {
 });
 
 describe('mongoose_fuzzy_searching without the right options', function () {
-    var schema = new Schema({name: String}, {collection: 'fuzzy_searching_test_1'});
+    var schema = new Schema({ name: String }, { collection: 'fuzzy_searching_test_1' });
     schema.plugin(fuzzy_searching, {
         fields: [
             {
@@ -36,7 +36,7 @@ describe('mongoose_fuzzy_searching without the right options', function () {
     var User1 = mongoose.model('User1', schema);
 
     before(function (done) {
-        var user = new User1({name: 'Joe'});
+        var user = new User1({ name: 'Joe' });
 
         user.save(function () {
             done();
@@ -64,7 +64,7 @@ describe('mongoose_fuzzy_searching without the right options', function () {
 });
 
 describe('mongoose_fuzzy_searching without options and callback', function () {
-    var schema = new Schema({name: String}, {collection: 'fuzzy_searching_test_2'});
+    var schema = new Schema({ name: String }, { collection: 'fuzzy_searching_test_2' });
     schema.plugin(fuzzy_searching, {
         fields: [
             {
@@ -77,7 +77,7 @@ describe('mongoose_fuzzy_searching without options and callback', function () {
     var User2 = mongoose.model('User2', schema);
 
     before(function (done) {
-        var user = new User2({name: 'Joe'});
+        var user = new User2({ name: 'Joe' });
 
         user.save(function () {
             done();
@@ -97,26 +97,26 @@ describe('mongoose_fuzzy_searching without options and callback', function () {
     });
 
     it("fuzzySearch() -> should find one user with string as first parameter", function (done) {
-        User2.fuzzySearch('jo').then(result => {
+        User2.fuzzySearch('jo').then(function (result) {
             expect(result).to.have.lengthOf(1);
             done();
-        }).catch(err => {
+        }).catch(function (err) {
             done(err)
         });
     });
 
     it("fuzzySearch() -> should find one user with object as first parameter", function (done) {
-        User2.fuzzySearch({query: 'jo'}).then(result => {
+        User2.fuzzySearch({ query: 'jo' }).then(function (result) {
             expect(result).to.have.lengthOf(1);
             done();
-        }).catch(err => {
+        }).catch(function (err) {
             done(err);
         });
     });
 });
 
 describe('mongoose_fuzzy_searching with options and without callback', function () {
-    var schema = new Schema({name: String, lastName: String}, {collection: 'fuzzy_searching_test_3'});
+    var schema = new Schema({ name: String, lastName: String }, { collection: 'fuzzy_searching_test_3' });
     schema.plugin(fuzzy_searching, {
         fields: [
             {
@@ -129,7 +129,7 @@ describe('mongoose_fuzzy_searching with options and without callback', function 
     var User3 = mongoose.model('User3', schema);
 
     before(function (done) {
-        var user = new User3({name: 'Joe', lastName: 'Doe'});
+        var user = new User3({ name: 'Joe', lastName: 'Doe' });
 
         user.save(function () {
             done();
@@ -143,26 +143,26 @@ describe('mongoose_fuzzy_searching with options and without callback', function 
     });
 
     it("fuzzySearch() -> should not be able to find users because the options searches for `lastName` with value `test`", function (done) {
-        User3.fuzzySearch('jo', {lastName: 'test'}).then(result => {
+        User3.fuzzySearch('jo', { lastName: 'test' }).then(function (result) {
             expect(result).to.have.lengthOf(0);
             done();
-        }).catch(err => {
+        }).catch(function (err) {
             done(err)
         });
     });
 
     it("fuzzySearch() -> should be able to find users because the options searches for `lastName` with value `Doe`", function (done) {
-        User3.fuzzySearch('jo', {lastName: 'Doe'}).then(result => {
+        User3.fuzzySearch('jo', { lastName: 'Doe' }).then(function (result) {
             expect(result).to.have.lengthOf(1);
             done();
-        }).catch(err => {
+        }).catch(function (err) {
             done(err)
         });
     });
 });
 
 describe('mongoose_fuzzy_searching with callback and without options', function () {
-    var schema = new Schema({name: String}, {collection: 'fuzzy_searching_test_4'});
+    var schema = new Schema({ name: String }, { collection: 'fuzzy_searching_test_4' });
     schema.plugin(fuzzy_searching, {
         fields: [
             {
@@ -175,7 +175,7 @@ describe('mongoose_fuzzy_searching with callback and without options', function 
     var User4 = mongoose.model('User4', schema);
 
     before(function (done) {
-        var user = new User4({name: 'Joe'});
+        var user = new User4({ name: 'Joe' });
 
         user.save(function () {
             done();
@@ -198,7 +198,7 @@ describe('mongoose_fuzzy_searching with callback and without options', function 
 });
 
 describe('mongoose_fuzzy_searching with options and callback', function () {
-    var schema = new Schema({name: String, lastName: String}, {collection: 'fuzzy_searching_test_5'});
+    var schema = new Schema({ name: String, lastName: String }, { collection: 'fuzzy_searching_test_5' });
     schema.plugin(fuzzy_searching, {
         fields: [
             {
@@ -211,7 +211,7 @@ describe('mongoose_fuzzy_searching with options and callback', function () {
     var User5 = mongoose.model('User5', schema);
 
     before(function (done) {
-        var user = new User5({name: 'Joe', lastName: 'Doe'});
+        var user = new User5({ name: 'Joe', lastName: 'Doe' });
 
         user.save(function () {
             done();
@@ -225,7 +225,7 @@ describe('mongoose_fuzzy_searching with options and callback', function () {
     });
 
     it("fuzzySearch() -> should not be able to find users because the options searches for `lastName` with value `test` and return the result with callback", function (done) {
-        User5.fuzzySearch('jo', {lastName: 'test'}, function (err, doc) {
+        User5.fuzzySearch('jo', { lastName: 'test' }, function (err, doc) {
             expect(err).to.be.null;
             expect(doc).to.have.lengthOf(0);
             done(err);
@@ -233,7 +233,7 @@ describe('mongoose_fuzzy_searching with options and callback', function () {
     });
 
     it("fuzzySearch() -> should not be able to find users because the options searches for `lastName` with value `Doe` and return the result with callback", function (done) {
-        User5.fuzzySearch('jo', {lastName: 'Doe'}, function (err, doc) {
+        User5.fuzzySearch('jo', { lastName: 'Doe' }, function (err, doc) {
             expect(err).to.be.null;
             expect(doc).to.have.lengthOf(1);
             done(err);
@@ -248,7 +248,7 @@ describe('mongoose_fuzzy_searching with `keys` key', function () {
             description: String,
             language: String
         }]
-    }, {collection: 'fuzzy_searching_test_6'});
+    }, { collection: 'fuzzy_searching_test_6' });
 
     schema.plugin(fuzzy_searching, {
         fields: [
@@ -269,6 +269,11 @@ describe('mongoose_fuzzy_searching with `keys` key', function () {
                     title: 'this is a title',
                     description: 'descr!',
                     language: 'en'
+                },
+                {
+                    title: 'awesome!',
+                    description: 'descr!',
+                    language: 'el'
                 }
             ]
         });
@@ -288,14 +293,14 @@ describe('mongoose_fuzzy_searching with `keys` key', function () {
         User6.fuzzySearch('this is').then(function (result) {
             expect(result).to.have.lengthOf(1);
             done();
-        }).catch(err => {
+        }).catch(function (err) {
             done(err)
         });
     });
 });
 
 describe('mongoose_fuzzy_searching update user with `findOneAndUpdate`', function () {
-    var schema = new Schema({name: String}, {collection: 'fuzzy_searching_test_7'});
+    var schema = new Schema({ name: String }, { collection: 'fuzzy_searching_test_7' });
     schema.plugin(fuzzy_searching, {
         fields: [
             {
@@ -308,10 +313,10 @@ describe('mongoose_fuzzy_searching update user with `findOneAndUpdate`', functio
     var User7 = mongoose.model('User7', schema);
 
     before(function (done) {
-        var user = new User7({name: 'Joe'});
+        var user = new User7({ name: 'Joe' });
 
         user.save(function () {
-            User7.findOneAndUpdate(user._id, {name: 'Someone'}, function () {
+            User7.findOneAndUpdate(user._id, { name: 'Someone' }, function () {
                 done();
             });
         });
@@ -330,26 +335,26 @@ describe('mongoose_fuzzy_searching update user with `findOneAndUpdate`', functio
     });
 
     it("fuzzySearch() -> should find one user with string as first parameter", function (done) {
-        User7.fuzzySearch('some').then(result => {
+        User7.fuzzySearch('some').then(function (result) {
             expect(result).to.have.lengthOf(1);
             done();
-        }).catch(err => {
+        }).catch(function (err) {
             done(err)
         });
     });
 
     it("fuzzySearch() -> should find one user with object as first parameter", function (done) {
-        User7.fuzzySearch({query: 'some'}).then(result => {
+        User7.fuzzySearch({ query: 'some' }).then(function (result) {
             expect(result).to.have.lengthOf(1);
             done();
-        }).catch(err => {
+        }).catch(function (err) {
             done(err);
         });
     });
 });
 
 describe('mongoose_fuzzy_searching update user with `update`', function () {
-    var schema = new Schema({name: String}, {collection: 'fuzzy_searching_test_8'});
+    var schema = new Schema({ name: String }, { collection: 'fuzzy_searching_test_8' });
     schema.plugin(fuzzy_searching, {
         fields: [
             {
@@ -362,10 +367,10 @@ describe('mongoose_fuzzy_searching update user with `update`', function () {
     var User8 = mongoose.model('User8', schema);
 
     before(function (done) {
-        var user = new User8({name: 'Joe'});
+        var user = new User8({ name: 'Joe' });
 
         user.save(function () {
-            User8.update({_id: user._id}, {name: 'Someone'}, function () {
+            User8.update({ _id: user._id }, { name: 'Someone' }, function () {
                 done();
             });
         });
@@ -384,19 +389,19 @@ describe('mongoose_fuzzy_searching update user with `update`', function () {
     });
 
     it("fuzzySearch() -> should find one user with string as first parameter", function (done) {
-        User8.fuzzySearch('some').then(result => {
+        User8.fuzzySearch('some').then(function (result) {
             expect(result).to.have.lengthOf(1);
             done();
-        }).catch(err => {
+        }).catch(function (err) {
             done(err)
         });
     });
 
     it("fuzzySearch() -> should find one user with object as first parameter", function (done) {
-        User8.fuzzySearch({query: 'some'}).then(result => {
+        User8.fuzzySearch({ query: 'some' }).then(function (result) {
             expect(result).to.have.lengthOf(1);
             done();
-        }).catch(err => {
+        }).catch(function (err) {
             done(err);
         });
     });
