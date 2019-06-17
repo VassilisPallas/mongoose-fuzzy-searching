@@ -24,6 +24,7 @@ after(function (done) {
 
 
 describe('new versions of js (with Object.values)', function () {
+
     describe('mongoose_fuzzy_searching without the right options', function () {
         var schema = new Schema({ name: String }, { collection: 'fuzzy_searching_test_1' });
         schema.plugin(fuzzy_searching, {
@@ -109,6 +110,15 @@ describe('new versions of js (with Object.values)', function () {
 
         it("fuzzySearch() -> should find one user with object as first parameter", function (done) {
             User2.fuzzySearch({ query: 'jo' }).then(function (result) {
+                expect(result).to.have.lengthOf(1);
+                done();
+            }).catch(function (err) {
+                done(err);
+            });
+        });
+
+        it("fuzzySearch() -> should find one user with object as first parameter (with `prefixOnly`)", function (done) {
+            User2.fuzzySearch({ query: 'Joe', prefixOnly: true }).then(function (result) {
                 expect(result).to.have.lengthOf(1);
                 done();
             }).catch(function (err) {

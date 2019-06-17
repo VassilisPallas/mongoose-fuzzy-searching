@@ -31,23 +31,42 @@ var mongoose_fuzzy_searching = require('mongoose-fuzzy-searching');
 var UserSchema = new Schema({
     firstName: String,
     lastName: String,
-    email: String
+    email: String,
+    age: Number
 });
 
 UserSchema.plugin(mongoose_fuzzy_searching, {fields: ['firstName', 'lastName']});
 
 var User = mongoose.model('User', UserSchema);
 
-var user = new User({ firstName: 'Joe',  lastName: 'Doe', email: 'joe.doe@mail.com'});
+var user = new User({ firstName: 'Joe',  lastName: 'Doe', email: 'joe.doe@mail.com', age: 30});
 
 user.save(function () {
     // mongodb: { ..., firstName_fuzzy: [String], lastName_fuzzy: [String] }
 
     User.fuzzySearch('jo', function (err, users) {
         console.error(err);
-        console.log(users); // each user object will not contain the fuzzy keys
+        console.log(users);
+        // each user object will not contain the fuzzy keys:
+        // Eg.
+        // {
+        //   "firstName": "Joe",
+        //   "lastName": "Doe",
+        //   "email": "joe.doe@mail.com",
+        //   "age": 30,
+        //   "confidenceScore": 34.3 ($text meta score)
+        // }
     });
 });
+```
+
+The results are sorted by the `confidenceScore` key. You can override this option.
+
+```javascript
+    User.fuzzySearch('jo').sort({ age: -1 }).exec(function (err, users) {
+        console.error(err);
+        console.log(users);
+    });
 ```
 
 ### Plugin Options
@@ -80,7 +99,9 @@ The below table contains the expected keys for an object
 | __key__                    | __type__          | __description__                                                                                                                         |
 |----------------------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
 | name                       | __String__        | Collection key name                                                                                                                     |
-| minSize                    | __Integer__       | N-grams min size. Default min size is `2`. [Learn more about N-grams](http://text-analytics101.rxnlp.com/2014/11/what-are-n-grams.html) |
+| minSize                    | __Integer__       | N-grams min size. Default value is `2`. [Learn more about N-grams](http://text-analytics101.rxnlp.com/2014/11/what-are-n-grams.html) |
+| weight                    | __Integer__       |  denotes the significance of the field relative to the other indexed fields in terms of the text search score. [Learn more about index weights](https://docs.mongodb.com/manual/tutorial/control-results-of-text-search/) |
+| prefixOnly                    | __Integer__       | Only return ngrams from start of word. Default value is false. (It gives more precise results) |
 | escapeSpecialCharacters    | __Boolean__       | Remove special characters from N-grams. Default value is `true`                                                                         |
 | keys                       | __Array[String]__ | If the type of the collection attribute is `Object`, you can define which attributes will be used for fuzzy searching                   |
 
@@ -103,13 +124,15 @@ var UserSchema = new Schema({
 UserSchema.plugin(mongoose_fuzzy_searching, {
     fields: [{
         name: 'firstName',
-        minSize: 2
+        minSize: 2,
+        weight: 5
     }, {
         name: 'lastName',
-        minSize: 3
+        minSize: 3,
+        prefixOnly: true,
     }, {
         name: 'email',
-        escapeSpecialCharacters: false
+        escapeSpecialCharacters: false,
     }, {
         name: 'text',
         keys: ["title", "description"]
@@ -119,9 +142,18 @@ UserSchema.plugin(mongoose_fuzzy_searching, {
 ```
 ### fuzzySearch parameters
 
-`fuzzySearch` method can accept up to three parameters. The first one is the query, which can either be a `String` or an `Object`. This parameter is __required__.
-The second parameter can either be an `Object` with other queries, for example `age: { $gt: 18 }`, or a callback function.
+`fuzzySearch` method can accept up to three parameters. The first one is the query, which can either be either a `String` or an `Object`. This parameter is __required__.
+The second parameter can either be eiter an `Object` with other queries, for example `age: { $gt: 18 }`, or a callback function.
 If the second parameter is the options, then the third parameter is the callback function. If you don't set a callback function, the results will be returned inside a Promise.
+
+The below table contains the expected keys for the first parameter (if is an object)
+
+| __key__                    | __type__          | __description__                                                                                                                         |
+|----------------------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| query                    | __String__       | String to search |
+| prefixOnly                       | __Boolean__        | Split query from the prefix                                                                                                                     |
+
+
 
 ```javascript
 
