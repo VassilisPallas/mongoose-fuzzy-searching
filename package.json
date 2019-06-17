@@ -5,7 +5,7 @@
   "description": "Mongoose fuzzy searching plugin",
   "main": "index.js",
   "scripts": {
-    "test": "nyc mocha --reporter spec ./tests/*"
+    "test": "nyc mocha --reporter spec ./tests/* -s 0"
   },
   "keywords": [
     "mongoose",

@@ -81,12 +81,12 @@ var letters = {
     "ώ": "o",
 };
 
-function handleGreekIdioms(ch, nextCh){
+function handleGreekIdioms(ch, nextCh) {
     var found = false;
     var letter = null;
 
     if (!nextCh) {
-        return {letter: letters[ch], found};
+        return { letter: letters[ch], found };
     }
 
     switch (ch) {
@@ -99,10 +99,10 @@ function handleGreekIdioms(ch, nextCh){
             break;
     }
 
-    return {letter: letter || letters[ch], found};
+    return { letter: letter || letters[ch], found };
 }
 
-module.exports = (word) => {
+module.exports = function (word) {
     if (!word) {
         return '';
     }
@@ -119,7 +119,7 @@ module.exports = (word) => {
         if (!letters[ch]) {
             newWord += ch;
         } else {
-            var {letter, found} = handleGreekIdioms(ch, nextCh);
+            var { letter, found } = handleGreekIdioms(ch, nextCh);
             newWord += letter;
             idiom = found;
         }
