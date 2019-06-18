@@ -130,7 +130,7 @@ function objectToValuesPolyfill(object) {
 /* istanbul ignore next */
 function addToSchema(name) {
     return {
-        [`${name}_fuzzy`]: createSchemaObject(String, {
+        [`${name}_fuzzy`]: createSchemaObject([String], {
             default: '',
             index: false
         })
@@ -191,7 +191,7 @@ function createFields(schema, fields) {
 function createNGrams(attributes, fields) {
     fields.forEach(function (item) {
         if (attributes[item] && (typeof item === 'string' || item instanceof String)) {
-            attributes[`${item}_fuzzy`] = makeNGrams(attributes[item]).join(' ');
+            attributes[`${item}_fuzzy`] = makeNGrams(attributes[item]);
         } else if (isObject(item)) {
             var escapeSpecialCharacters = item.escapeSpecialCharacters !== false;
             if (item.keys) {
@@ -199,13 +199,13 @@ function createNGrams(attributes, fields) {
                 attributes[item.name].forEach(function (data) {
                     var obj = {};
                     item.keys.forEach(function (key, index) {
-                        obj = Object.assign({}, obj, { [`${key}_fuzzy`]: makeNGrams(data[key], escapeSpecialCharacters, item.minSize, item.prefixOnly).join(' ') });
+                        obj = Object.assign({}, obj, { [`${key}_fuzzy`]: makeNGrams(data[key], escapeSpecialCharacters, item.minSize, item.prefixOnly) });
                     });
                     attrs.push(obj);
                 });
                 attributes[`${item.name}_fuzzy`] = attrs;
             } else {
-                attributes[`${item.name}_fuzzy`] = makeNGrams(attributes[item.name], escapeSpecialCharacters, item.minSize, item.prefixOnly).join(' ');
+                attributes[`${item.name}_fuzzy`] = makeNGrams(attributes[item.name], escapeSpecialCharacters, item.minSize, item.prefixOnly);
             }
         }
     });
