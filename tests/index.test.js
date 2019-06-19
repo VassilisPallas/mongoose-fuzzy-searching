@@ -22,8 +22,8 @@ describe('nGrams', function () {
             expect(nGrams()).to.be.empty;
         });
 
-        it('should return empty array with attribute `a`', function () {
-            expect(nGrams('a')).to.be.empty;
+        it('should be equal to ["a"] if the given text is `a`', function () {
+            expect(nGrams('a')).to.deep.equal(["a"]);
         });
 
         it('should be equal to `["aa", "aaa"]` if the given text is `aaa`', function () {

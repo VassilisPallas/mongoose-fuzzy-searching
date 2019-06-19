@@ -35,6 +35,10 @@ function nGrams(text, minSize, prefixOnly) {
     text = text.slice ? text.toLowerCase() : String(text);
     index = prefixOnly ? 0 : text.length - minSize + 1;
 
+    if (text.length <= minSize) {
+        return [text];
+    }
+
     if (!prefixOnly && index < 1) {
         return [];
     }
