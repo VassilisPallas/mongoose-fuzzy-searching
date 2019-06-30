@@ -292,7 +292,7 @@ module.exports = function (schema, options) {
 
         var queryString = isObject(args[0]) ? args[0].query : args[0];
 
-        var query = makeNGrams(queryString, false, constants.DEFAULT_MIN_SIZE, isObject(args[0]) ? args[0].prefixSearch : constants.DEFAULT_PREFIX_ONLY).join(' ');
+        var query = makeNGrams(queryString, false, constants.DEFAULT_MIN_SIZE, isObject(args[0]) ? args[0].prefixOnly : constants.DEFAULT_PREFIX_ONLY).join(' ');
         var options = null;
         var callback = null;
 
