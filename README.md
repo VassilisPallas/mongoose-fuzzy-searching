@@ -63,10 +63,10 @@ user.save(function () {
 The results are sorted by the `confidenceScore` key. You can override this option.
 
 ```javascript
-    User.fuzzySearch('jo').sort({ age: -1 }).exec(function (err, users) {
-        console.error(err);
-        console.log(users);
-    });
+User.fuzzySearch('jo').sort({ age: -1 }).exec(function (err, users) {
+    console.error(err);
+    console.log(users);
+});
 ```
 
 ### Plugin Options
@@ -101,7 +101,7 @@ The below table contains the expected keys for an object
 | name                       | __String__        | Collection key name                                                                                                                     |
 | minSize                    | __Integer__       | N-grams min size. Default value is `2`. [Learn more about N-grams](http://text-analytics101.rxnlp.com/2014/11/what-are-n-grams.html) |
 | weight                    | __Integer__       |  denotes the significance of the field relative to the other indexed fields in terms of the text search score. [Learn more about index weights](https://docs.mongodb.com/manual/tutorial/control-results-of-text-search/) |
-| prefixOnly                    | __Integer__       | Only return ngrams from start of word. Default value is false. (It gives more precise results) |
+| prefixOnly                    | __Boolean__       | Only return ngrams from start of word. Default value is false. (It gives more precise results) |
 | escapeSpecialCharacters    | __Boolean__       | Remove special characters from N-grams. Default value is `true`                                                                         |
 | keys                       | __Array[String]__ | If the type of the collection attribute is `Object`, you can define which attributes will be used for fuzzy searching                   |
 
