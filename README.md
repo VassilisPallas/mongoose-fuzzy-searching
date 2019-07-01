@@ -135,7 +135,7 @@ UserSchema.plugin(mongoose_fuzzy_searching, {
         escapeSpecialCharacters: false,
     }, {
         name: 'text',
-        keys: ["title", "description"]
+        keys: ["title"] // supports only one key so far.
     }]
     
 });
