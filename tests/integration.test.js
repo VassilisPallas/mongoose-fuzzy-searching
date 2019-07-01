@@ -312,7 +312,7 @@ describe('new versions of js (with Object.values)', function () {
     });
 
     describe('mongoose_fuzzy_searching update user with `findOneAndUpdate`', function () {
-        var schema = new Schema({ name: String }, { collection: 'fuzzy_searching_test_7' });
+        var schema = new Schema({ name: String, age: Number }, { collection: 'fuzzy_searching_test_7' });
         schema.plugin(fuzzy_searching, {
             fields: [
                 {
@@ -328,7 +328,7 @@ describe('new versions of js (with Object.values)', function () {
             var user = new User7({ name: 'Joe' });
 
             user.save(function () {
-                User7.findOneAndUpdate(user._id, { name: 'Someone' }, function () {
+                User7.findOneAndUpdate(user._id, { age: 30 }, function () {
                     done();
                 });
             });
@@ -341,13 +341,13 @@ describe('new versions of js (with Object.values)', function () {
         });
 
         it("fuzzySearch() -> should return Promise", function (done) {
-            var result = User7.fuzzySearch('some');
+            var result = User7.fuzzySearch('jo');
             expect(result).to.have.property('then');
             done();
         });
 
         it("fuzzySearch() -> should find one user with string as first parameter", function (done) {
-            User7.fuzzySearch('some').then(function (result) {
+            User7.fuzzySearch('jo').then(function (result) {
                 expect(result).to.have.lengthOf(1);
                 done();
             }).catch(function (err) {
@@ -356,7 +356,7 @@ describe('new versions of js (with Object.values)', function () {
         });
 
         it("fuzzySearch() -> should find one user with object as first parameter", function (done) {
-            User7.fuzzySearch({ query: 'some' }).then(function (result) {
+            User7.fuzzySearch({ query: 'jo' }).then(function (result) {
                 expect(result).to.have.lengthOf(1);
                 done();
             }).catch(function (err) {

@@ -198,7 +198,7 @@ function createNGrams(attributes, fields) {
             attributes[`${item}_fuzzy`] = makeNGrams(attributes[item]);
         } else if (isObject(item)) {
             var escapeSpecialCharacters = item.escapeSpecialCharacters !== false;
-            if (item.keys) {
+            if (item.keys && attributes[`${item.name}`]) {
                 var attrs = [];
                 attributes[item.name].forEach(function (data) {
                     var obj = {};
@@ -208,7 +208,7 @@ function createNGrams(attributes, fields) {
                     attrs.push(obj);
                 });
                 attributes[`${item.name}_fuzzy`] = attrs;
-            } else {
+            } else if (attributes[`${item.name}`]) {
                 attributes[`${item.name}_fuzzy`] = makeNGrams(attributes[item.name], escapeSpecialCharacters, item.minSize, item.prefixOnly);
             }
         }
