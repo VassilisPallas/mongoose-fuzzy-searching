@@ -11,6 +11,8 @@ This code is based on [this article](https://medium.com/xeneta/fuzzy-search-with
 ## Features
   - Creates Ngrams for the selected keys in the collection
   - [Add __fuzzySearch__ method on model](#simple-usage)
+  - [Work with pre-existing data](#work-with-pre-existing-data)
+  - [Limitations](#limitations)
 
 ## Installation
 Install using [npm](https://npmjs.org)
@@ -96,14 +98,14 @@ UserSchema.plugin(mongoose_fuzzy_searching, {
 
 The below table contains the expected keys for an object
 
-| __key__                    | __type__          | __description__                                                                                                                         |
-|----------------------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| name                       | __String__        | Collection key name                                                                                                                     |
-| minSize                    | __Integer__       | N-grams min size. Default value is `2`. [Learn more about N-grams](http://text-analytics101.rxnlp.com/2014/11/what-are-n-grams.html) |
-| weight                    | __Integer__       |  denotes the significance of the field relative to the other indexed fields in terms of the text search score. [Learn more about index weights](https://docs.mongodb.com/manual/tutorial/control-results-of-text-search/) |
-| prefixOnly                    | __Boolean__       | Only return ngrams from start of word. Default value is false. (It gives more precise results) |
-| escapeSpecialCharacters    | __Boolean__       | Remove special characters from N-grams. Default value is `true`                                                                         |
-| keys                       | __Array[String]__ | If the type of the collection attribute is `Object`, you can define which attributes will be used for fuzzy searching                   |
+| __key__| __type__ | __default__ | __description__ |
+|----------------------------|-------------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| name | __String__ | null |Collection key name |
+| minSize | __Integer__ | 2 |N-grams min size. [Learn more about N-grams](http://text-analytics101.rxnlp.com/2014/11/what-are-n-grams.html) |
+| weight | __Integer__ | 1 | Denotes the significance of the field relative to the other indexed fields in terms of the text search score. [Learn more about index weights](https://docs.mongodb.com/manual/tutorial/control-results-of-text-search/) |
+| prefixOnly | __Boolean__ | false | Only return ngrams from start of word. (It gives more precise results) | 
+| escapeSpecialCharacters | __Boolean__ | true | Remove special characters from N-grams.|
+| keys | __Array[String]__ | null | If the type of the collection attribute is `Object`, you can define which attributes will be used for fuzzy searching |
 
 Example:
 
@@ -148,11 +150,13 @@ If the second parameter is the options, then the third parameter is the callback
 
 The below table contains the expected keys for the first parameter (if is an object)
 
-| __key__                    | __type__          | __description__                                                                                                                         |
-|----------------------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| query                    | __String__       | String to search |
-| prefixOnly                       | __Boolean__        | Split query from the prefix                                                                                                                     |
+| __key__ | __type__ | __deafult__ | __description__ |
+|----------------------------|-------------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| query | __String__ | null | String to search |
+| minSize | __Integer__ | 2 | N-grams min size. |
+| prefixOnly | __Boolean__ | false | Only return ngrams from start of word. (It gives more precise results) the prefix |
 
+Example:
 
 
 ```javascript
@@ -161,6 +165,8 @@ The below table contains the expected keys for the first parameter (if is an obj
 Model.fuzzySearch('jo').then(console.log).catch(console.error);
 // or
 Model.fuzzySearch({query: 'jo'}).then(console.log).catch(console.error);
+// with prefixOnly and minSize
+Model.fuzzySearch({query: 'jo', prefixOnly: true, minSize: 4}).then(console.log).catch(console.error);
 
 /* With options and without callback */
 Model.fuzzySearch('jo', {age: { $gt: 18 }}).then(console.log).catch(console.error);
@@ -183,6 +189,100 @@ Model.fuzzySearch('jo', {age: { $gt: 18 }}, function(err, doc) {
   }
 });
 ```
+
+## Work with pre-existing data
+
+The plugin creates indexes for the selected fields. In the below example the new indexes will be `firstName_fuzzy` and `lastName_fuzzy`. Also, each document will have the fields `firstName_fuzzy`[String] and `lastName_fuzzy`[String]. These arrays will contain the anagrams for the selected fields.
+
+```javascript
+var mongoose_fuzzy_searching = require('mongoose-fuzzy-searching');
+
+var UserSchema = new Schema({
+    firstName: String,
+    lastName: String,
+    email: String,
+    age: Number
+});
+
+UserSchema.plugin(mongoose_fuzzy_searching, {fields: ['firstName', 'lastName']});
+```
+
+In other words, thit plugin creates anagrams when you create or update a document. All the pre-existing documents won't contain these fuzzy arrays, so `fuzzySearch` function, will not be able to find them.
+
+### Update all pre-existing documents with ngrams
+
+In order to create anagrams for pre-existing documents, you should update each document. The below example, updates the `firstName` attribute to every document on the collection `User`.
+
+```javascript
+const { each, queue } = require('async');
+
+const updateFuzzy = async (Model, attrs) => {
+   const docs = await Model.find();
+
+   const updateToDatabase = async (data, callback) => {
+      try {
+         if(attrs && attrs.length) {
+            const obj = attrs.reduce((acc, attr) => ({ ...acc, [attr]: data[attr] }), {});
+            return Model.findByIdAndUpdate(data._id, obj).exec();
+         }
+
+         return Model.findByIdAndUpdate(data._id, data).exec();
+      } catch (e) {
+         console.log(e);
+      } finally {
+         callback();
+      }
+   };
+
+   const myQueue = queue(updateToDatabase, 10);
+   each(docs, (data) => myQueue.push(data.toObject()));
+
+   myQueue.empty = function () {};
+   myQueue.drain = function () {};
+}
+
+// usage
+updateFuzzy(User, ['firstName']);
+```
+
+### Delete old ngrams from all documents
+
+In the previous example, we set `firstName` and `lastName` as the fuzzy attributes. If you remove the `firstName` from the fuzzy fields, the `firstName_fuzzy` array will not be removed by the collection. If you want to remove the array on each document you have to unset that value.
+
+```javascript
+const removeEventUnsedFuzzyElements = (Model, attrs) => {
+    const docs = await Model.find();
+
+    const updateToDatabase = async (data, callback) => {
+        try {
+            const $unset = attrs.reduce((acc, attr) => ({...acc, [`${attr}_fuzzy`]: 1}), {})
+            return Model.findByIdAndUpdate(data._id, { $unset }, { new: true, strict: false }).exec();
+        } catch (e) {
+            console.log(e);
+        } finally {
+            callback();
+        }
+    };
+
+    const myQueue = queue(updateToDatabase, 10);
+
+    each(docs, (data) => myQueue.push(data.toObject()), () => { });
+
+    myQueue.empty = function () {
+    };
+
+    myQueue.drain = function () {
+        console.log("done");
+    };
+}
+
+// usage
+removeEventUnsedFuzzyElements(User, ['firstName']);
+```
+
+## Limitations
+
+In version `3.2`, Mongoose introduced the functions `updateMany` and `insertMany`. Unfortunately, these functions don't call pre-save and pre-update hooks, which means that the plugin can't generate the fuzzy anagrams. Instead, you have to insert or update the documents one by one.
 
 ## License
 
