@@ -292,7 +292,9 @@ module.exports = function (schema, options) {
 
         var queryString = isObject(args[0]) ? args[0].query : args[0];
 
-        var query = makeNGrams(queryString, false, constants.DEFAULT_MIN_SIZE, isObject(args[0]) ? args[0].prefixOnly : constants.DEFAULT_PREFIX_ONLY).join(' ');
+        var checkPrefixOnly = isObject(args[0]) ? args[0].prefixOnly : constants.DEFAULT_PREFIX_ONLY;
+        var defaultNgamMinSize = isObject(args[0]) ? args[0].minSize : constants.DEFAULT_MIN_SIZE;
+        var query = makeNGrams(queryString, false, defaultNgamMinSize, checkPrefixOnly).join(' ');
         var options = null;
         var callback = null;
 
