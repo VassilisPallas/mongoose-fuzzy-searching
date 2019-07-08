@@ -250,7 +250,9 @@ updateFuzzy(User, ['firstName']);
 In the previous example, we set `firstName` and `lastName` as the fuzzy attributes. If you remove the `firstName` from the fuzzy fields, the `firstName_fuzzy` array will not be removed by the collection. If you want to remove the array on each document you have to unset that value.
 
 ```javascript
-const removeEventUnsedFuzzyElements = (Model, attrs) => {
+const { each, queue } = require('async');
+
+const removeUnsedFuzzyElements = (Model, attrs) => {
     const docs = await Model.find();
 
     const updateToDatabase = async (data, callback) => {
@@ -277,7 +279,7 @@ const removeEventUnsedFuzzyElements = (Model, attrs) => {
 }
 
 // usage
-removeEventUnsedFuzzyElements(User, ['firstName']);
+removeUnsedFuzzyElements(User, ['firstName']);
 ```
 
 ## Limitations
