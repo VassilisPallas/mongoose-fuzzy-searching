@@ -304,7 +304,8 @@ module.exports = function (schema, options) {
     var returnOptions = {
         transform: removeFuzzyElements(options.fields),
         getters: true,
-        setters: true
+        setters: true,
+        virtuals: true
     };
     schema.set('toObject', returnOptions);
     schema.set('toJSON', returnOptions);
