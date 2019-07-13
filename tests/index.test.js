@@ -140,6 +140,38 @@ describe('isObject', function () {
     });
 });
 
+describe('isFunction', function () {
+    var isFunction;
+
+    beforeEach(function () {
+        isFunction = plugin.__get__('isFunction');
+    });
+
+    afterEach(function () {
+        plugin = rewire('../index');
+    });
+
+    it('should return false because the parameter is array', function () {
+        expect(isFunction([])).to.be.false;
+    });
+
+    it('should return false because the parameter is undefined', function () {
+        expect(isFunction()).to.be.false;
+    });
+
+    it('should return false because the parameter is null', function () {
+        expect(isFunction(null)).to.be.false;
+    });
+
+    it('should return false because the parameter is object', function () {
+        expect(isFunction({})).to.be.false;
+    });
+
+    it('should return true', function () {
+        expect(isFunction(function () { })).to.be.true;
+    });
+});
+
 describe('objectToValuesPolyfill', function () {
     var objectToValuesPolyfill;
 

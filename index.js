@@ -4,6 +4,12 @@ var mongoose = require('mongoose');
 var Model = mongoose.Model;
 var replaceLanguageCharacters = require('./languageCharacters');
 
+/**
+ * Reusable constant values
+ * @typedef {Object} constants
+ * @property {number} DEFAULT_MIN_SIZE - Default min size for anagrams.
+ * @property {boolean} DEFAULT_PREFIX_ONLY - Whether return ngrams from start of word or not
+ */
 var constants = {
     DEFAULT_MIN_SIZE: 2,
     DEFAULT_PREFIX_ONLY: false
@@ -113,11 +119,20 @@ function createSchemaObject(typeValue, options) {
 
 /**
  * Returns if the variable is an object and if the the object is empty
- * @param {object} obj
+ * @param {any} obj
  * @return {boolean}
  */
 function isObject(obj) {
     return !!obj && obj.constructor === Object && Object.keys(obj).length > 0;
+}
+
+/**
+ * Returns if the variable is a Function
+ * @param {any} fn
+ * @return {boolean}
+ */
+function isFunction(fn) {
+    return !!(fn && ("function" === typeof fn || fn instanceof Function));
 }
 
 /**
@@ -151,6 +166,23 @@ function addArrayToSchema(name) {
     };
 }
 
+/* istanbul ignore next */
+function createByFieldType(fields, strCb, objectCb, objectKeysCb) {
+    fields.forEach(function (item) {
+        if (typeof item === 'string' || item instanceof String && isFunction(strCb)) {
+            strCb(item);
+        } else if (isObject(item)) {
+            if (item.keys && isFunction(objectKeysCb)) {
+                objectKeysCb(item);
+            } else if (isFunction(objectCb)) {
+                objectCb(item);
+            }
+        } else {
+            throw new TypeError('Fields items must be String or Object.');
+        }
+    });
+}
+
 /**
  * Add the fields to the collection
  * @param {object} schema - The mongoose schema
@@ -161,27 +193,28 @@ function addArrayToSchema(name) {
 function createFields(schema, fields) {
     var indexes = {};
     var weights = {};
-    fields.forEach(function (item) {
-        if (typeof item === 'string' || item instanceof String) {
-            schema.add(addToSchema(item));
-            indexes[`${item}_fuzzy`] = 'text';
-        } else if (isObject(item)) {
-            if (item.keys) {
-                item.keys.forEach(key => {
-                    indexes[`${item.name}_fuzzy.${key}_fuzzy`] = 'text';
-                });
-                schema.add(addArrayToSchema(item.name));
-            } else {
-                schema.add(addToSchema(item.name));
-                indexes[`${item.name}_fuzzy`] = 'text';
-                if (item.weight) {
-                    weights[`${item.name}_fuzzy`] = item.weight;
-                }
-            }
-        } else {
-            throw new TypeError('Fields items must be String or Object.');
+
+    function strCb(item) {
+        schema.add(addToSchema(item));
+        indexes[`${item}_fuzzy`] = 'text';
+    }
+
+    function objectCb(item) {
+        schema.add(addToSchema(item.name));
+        indexes[`${item.name}_fuzzy`] = 'text';
+        if (item.weight) {
+            weights[`${item.name}_fuzzy`] = item.weight;
         }
-    });
+    }
+
+    function objectKeysCb(item) {
+        item.keys.forEach(key => {
+            indexes[`${item.name}_fuzzy.${key}_fuzzy`] = 'text';
+        });
+        schema.add(addArrayToSchema(item.name));
+    }
+
+    createByFieldType(fields, strCb, objectCb, objectKeysCb);
     schema.index(indexes, { weights });
 }
 
@@ -193,26 +226,35 @@ function createFields(schema, fields) {
 
 /* istanbul ignore next */
 function createNGrams(attributes, fields) {
-    fields.forEach(function (item) {
-        if (attributes[item] && (typeof item === 'string' || item instanceof String)) {
+    function strCb(item) {
+        if (attributes[item]) {
             attributes[`${item}_fuzzy`] = makeNGrams(attributes[item]);
-        } else if (isObject(item)) {
-            var escapeSpecialCharacters = item.escapeSpecialCharacters !== false;
-            if (item.keys && attributes[`${item.name}`]) {
-                var attrs = [];
-                attributes[item.name].forEach(function (data) {
-                    var obj = {};
-                    item.keys.forEach(function (key, index) {
-                        obj = Object.assign({}, obj, { [`${key}_fuzzy`]: makeNGrams(data[key], escapeSpecialCharacters, item.minSize, item.prefixOnly) });
-                    });
-                    attrs.push(obj);
-                });
-                attributes[`${item.name}_fuzzy`] = attrs;
-            } else if (attributes[`${item.name}`]) {
-                attributes[`${item.name}_fuzzy`] = makeNGrams(attributes[item.name], escapeSpecialCharacters, item.minSize, item.prefixOnly);
-            }
         }
-    });
+    }
+
+    function objectCb(item) {
+        if (attributes[`${item.name}`]) {
+            var escapeSpecialCharacters = item.escapeSpecialCharacters !== false;
+            attributes[`${item.name}_fuzzy`] = makeNGrams(attributes[item.name], escapeSpecialCharacters, item.minSize, item.prefixOnly);
+        }
+    }
+
+    function objectKeysCb(item) {
+        if (attributes[`${item.name}`]) {
+            var escapeSpecialCharacters = item.escapeSpecialCharacters !== false;
+            var attrs = [];
+            attributes[item.name].forEach(function (data) {
+                var obj = {};
+                item.keys.forEach(function (key, index) {
+                    obj = Object.assign({}, obj, { [`${key}_fuzzy`]: makeNGrams(data[key], escapeSpecialCharacters, item.minSize, item.prefixOnly) });
+                });
+                attrs.push(obj);
+            });
+            attributes[`${item.name}_fuzzy`] = attrs;
+        }
+    }
+
+    createByFieldType(fields, strCb, objectCb, objectKeysCb);
 }
 
 /**
@@ -223,13 +265,15 @@ function createNGrams(attributes, fields) {
 /* istanbul ignore next */
 function removeFuzzyElements(fields) {
     return function (doc, ret, opt) {
-        fields.forEach(function (item) {
-            if (typeof item === 'string' || item instanceof String) {
-                delete ret[`${item}_fuzzy`];
-            } else if (isObject(item)) {
-                delete ret[`${item.name}_fuzzy`];
-            }
-        });
+        function strCb(item) {
+            delete ret[`${item}_fuzzy`];
+        }
+
+        function objectCb(item) {
+            delete ret[`${item.name}_fuzzy`];
+        }
+
+        createByFieldType(fields, strCb, objectCb);
         return ret;
     }
 }
