@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose');
 var Model = mongoose.Model;
+var model = mongoose.model;
 var replaceLanguageCharacters = require('./languageCharacters');
 
 /**
@@ -13,6 +14,24 @@ var replaceLanguageCharacters = require('./languageCharacters');
 var constants = {
     DEFAULT_MIN_SIZE: 2,
     DEFAULT_PREFIX_ONLY: false
+}
+
+/* istanbul ignore next */
+function parseArguments(args, i1, i2) {
+    var options = {};
+    var callback = null;
+
+    if (args[i1] && isFunction(args[i1])) {
+        callback = args[i1];
+    } else if (args[i1] && isObject(args[i1])) {
+        options = args[i1];
+    }
+
+    if (!callback && typeof args[i2] === 'function') {
+        callback = args[i2];
+    }
+
+    return { options, callback };
 }
 
 /**
@@ -310,20 +329,32 @@ module.exports = function (schema, options) {
     schema.set('toObject', returnOptions);
     schema.set('toJSON', returnOptions);
 
-    schema.pre('save', function (next) {
-        createNGrams(this, options.fields);
-        next();
-    });
+    function saveMiddleware(next) {
+        if (this) {
+            createNGrams(this, options.fields);
+            next();
+        }
+    }
 
-    schema.pre('update', function (next) {
-        createNGrams(this._update, options.fields);
-        next();
-    });
+    function updateMiddleware(next) {
+        if (this._update) {
+            createNGrams(this._update, options.fields);
+            next();
+        }
+    }
 
-    schema.pre('findOneAndUpdate', function (next) {
-        createNGrams(this._update, options.fields);
+    function insertMany(next, docs) {
+        docs.forEach(function (doc) {
+            createNGrams(doc, options.fields)
+        });
         next();
-    });
+    }
+
+    schema.pre('save', saveMiddleware);
+    schema.pre('update', updateMiddleware);
+    schema.pre('findOneAndUpdate', updateMiddleware);
+    schema.pre('insertMany', insertMany);
+    schema.pre('updateMany', updateMiddleware);
 
     schema.statics['fuzzySearch'] = function () {
 
@@ -340,18 +371,10 @@ module.exports = function (schema, options) {
         var checkPrefixOnly = isObject(args[0]) ? args[0].prefixOnly : constants.DEFAULT_PREFIX_ONLY;
         var defaultNgamMinSize = isObject(args[0]) ? args[0].minSize : constants.DEFAULT_MIN_SIZE;
         var query = makeNGrams(queryString, false, defaultNgamMinSize, checkPrefixOnly).join(' ');
-        var options = null;
-        var callback = null;
 
-        if (args[1] && typeof args[1] === 'function') {
-            callback = args[1];
-        } else if (args[1] && isObject(args[1])) {
-            options = args[1];
-        }
-
-        if (!callback && typeof args[2] === 'function') {
-            callback = args[2];
-        }
+        var parsedArguments = parseArguments(args, 1, 2);
+        var options = parsedArguments.options;
+        var callback = parsedArguments.callback;
 
         var search;
 
@@ -370,6 +393,6 @@ module.exports = function (schema, options) {
             }
         }
 
-        return Model['find'].apply(this, [null, { confidenceScore: { $meta: "textScore" } }, { sort: { confidenceScore: { $meta: "textScore" } } }, callback]).where(search);
+        return Model['find'].apply(this, [search, { confidenceScore: { $meta: "textScore" } }, { sort: { confidenceScore: { $meta: "textScore" } } }, callback]);
     };
 };
