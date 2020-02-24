@@ -262,13 +262,21 @@ function createNGrams(attributes, fields) {
         if (attributes[`${item.name}`]) {
             var escapeSpecialCharacters = item.escapeSpecialCharacters !== false;
             var attrs = [];
-            attributes[item.name].forEach(function (data) {
-                var obj = {};
+            var obj = {};
+            if(!attributes[item.name].length) {
+                let data = attributes[item.name]
                 item.keys.forEach(function (key, index) {
                     obj = Object.assign({}, obj, { [`${key}_fuzzy`]: makeNGrams(data[key], escapeSpecialCharacters, item.minSize, item.prefixOnly) });
                 });
                 attrs.push(obj);
-            });
+            } else {
+                attributes[item.name].forEach(function (data) {
+                    item.keys.forEach(function (key, index) {
+                        obj = Object.assign({}, obj, {[`${key}_fuzzy`]: makeNGrams(data[key], escapeSpecialCharacters, item.minSize, item.prefixOnly)});
+                    });
+                    attrs.push(obj);
+                });
+            }
             attributes[`${item.name}_fuzzy`] = attrs;
         }
     }
