@@ -262,10 +262,12 @@ function createNGrams(attributes, fields) {
         if (attributes[`${item.name}`]) {
             var escapeSpecialCharacters = item.escapeSpecialCharacters !== false;
             var attrs = [];
-            attributes[item.name].forEach(function (data) {
-                var obj = {};
+            var obj = {};
+            let data = attributes[item.name];
+            if(!data.length) data = [data];
+            data.forEach(function (data) {
                 item.keys.forEach(function (key, index) {
-                    obj = Object.assign({}, obj, { [`${key}_fuzzy`]: makeNGrams(data[key], escapeSpecialCharacters, item.minSize, item.prefixOnly) });
+                    obj = Object.assign({}, obj, {[`${key}_fuzzy`]: makeNGrams(data[key], escapeSpecialCharacters, item.minSize, item.prefixOnly)});
                 });
                 attrs.push(obj);
             });
