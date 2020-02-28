@@ -263,20 +263,14 @@ function createNGrams(attributes, fields) {
             var escapeSpecialCharacters = item.escapeSpecialCharacters !== false;
             var attrs = [];
             var obj = {};
-            if(!attributes[item.name].length) {
-                let data = attributes[item.name]
+            let data = attributes[item.name];
+            if(!data.length) data = [data];
+            data.forEach(function (data) {
                 item.keys.forEach(function (key, index) {
-                    obj = Object.assign({}, obj, { [`${key}_fuzzy`]: makeNGrams(data[key], escapeSpecialCharacters, item.minSize, item.prefixOnly) });
+                    obj = Object.assign({}, obj, {[`${key}_fuzzy`]: makeNGrams(data[key], escapeSpecialCharacters, item.minSize, item.prefixOnly)});
                 });
                 attrs.push(obj);
-            } else {
-                attributes[item.name].forEach(function (data) {
-                    item.keys.forEach(function (key, index) {
-                        obj = Object.assign({}, obj, {[`${key}_fuzzy`]: makeNGrams(data[key], escapeSpecialCharacters, item.minSize, item.prefixOnly)});
-                    });
-                    attrs.push(obj);
-                });
-            }
+            });
             attributes[`${item.name}_fuzzy`] = attrs;
         }
     }

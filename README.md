@@ -104,7 +104,7 @@ The below table contains the expected keys for an object
 | weight | __Integer__ | 1 | Denotes the significance of the field relative to the other indexed fields in terms of the text search score. [Learn more about index weights](https://docs.mongodb.com/manual/tutorial/control-results-of-text-search/) |
 | prefixOnly | __Boolean__ | false | Only return ngrams from start of word. (It gives more precise results) | 
 | escapeSpecialCharacters | __Boolean__ | true | Remove special characters from N-grams.|
-| keys | __Array[String]__ | null | If the type of the collection attribute is `Object`, you can define which attributes will be used for fuzzy searching |
+| keys | __Array[String]__ | null | If the type of the collection attribute is `Object` or `[Object]` (see example), you can define which attributes will be used for fuzzy searching |
 
 Example:
 

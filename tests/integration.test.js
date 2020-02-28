@@ -254,7 +254,7 @@ describe('new versions of js (with Object.values)', function () {
             });
         });
 
-        describe('mongoose_fuzzy_searching with `keys` key', function () {
+        describe('mongoose_fuzzy_searching with `keys` key and array of objects attribute', function () {
             var schema = new Schema({
                 texts: [{
                     title: String,
@@ -509,6 +509,57 @@ describe('new versions of js (with Object.values)', function () {
 
             it("fuzzySearch() -> should find one user with string as first parameter", function (done) {
                 User12.fuzzySearch('pall').then(function (result) {
+                    expect(result).to.have.lengthOf(1);
+                    done();
+                }).catch(function (err) {
+                    done(err)
+                });
+            });
+        });
+
+        describe('mongoose_fuzzy_searching with `keys` key and single object attribute' , function () {
+            var schema = new Schema({
+                title: {
+                    en: String,
+                    de: String,
+                    it: String
+                }
+            }, { collection: 'fuzzy_searching_test_13' });
+
+            schema.plugin(fuzzy_searching, {
+                fields: [
+                    {
+                        name: 'title',
+                        escapeSpecialCharacters: false,
+                        keys: ["en", "de", "it"]
+                    }
+                ]
+            });
+
+            var User13 = mongoose.model('User13', schema);
+
+            before(function (done) {
+                var user = new User13({
+                    title: {
+                        en: 'start wars',
+                        de: 'Krieg der Sterne',
+                        it: 'guerre stellari'
+                    }
+                });
+
+                user.save(function (err) {
+                    done();
+                });
+            });
+
+            after(function (done) {
+                mongoose.connection.dropCollection("fuzzy_searching_test_13", function () {
+                    done();
+                });
+            });
+
+            it("fuzzySearch() -> should be able to find the title because the text is `stellari`", function (done) {
+                User13.fuzzySearch('stellari').then(function (result) {
                     expect(result).to.have.lengthOf(1);
                     done();
                 }).catch(function (err) {
