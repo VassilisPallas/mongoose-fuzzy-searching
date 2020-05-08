@@ -369,6 +369,10 @@ module.exports = function (schema, options) {
         }
 
         var queryString = isObject(args[0]) ? args[0].query : args[0];
+        
+        if (!queryString) {
+            return Model['find'].apply(this);
+        }
 
         var checkPrefixOnly = isObject(args[0]) ? args[0].prefixOnly : constants.DEFAULT_PREFIX_ONLY;
         var defaultNgamMinSize = isObject(args[0]) ? args[0].minSize : constants.DEFAULT_MIN_SIZE;
