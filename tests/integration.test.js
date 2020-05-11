@@ -100,6 +100,15 @@ describe('new versions of js (with Object.values)', function () {
                 done();
             });
 
+            it("fuzzySearch() -> should find one user with empty string as first parameter", function (done) {
+                User2.fuzzySearch('').then(function (result) {
+                    expect(result).to.have.lengthOf(1);
+                    done();
+                }).catch(function (err) {
+                    done(err)
+                });
+            });
+
             it("fuzzySearch() -> should find one user with string as first parameter", function (done) {
                 User2.fuzzySearch('jo').then(function (result) {
                     expect(result).to.have.lengthOf(1);
