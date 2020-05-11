@@ -322,14 +322,35 @@ module.exports = function (schema, options) {
 
     createFields(schema, options.fields);
 
-    var returnOptions = {
-        transform: removeFuzzyElements(options.fields),
-        getters: true,
-        setters: true,
-        virtuals: true
-    };
-    schema.set('toObject', returnOptions);
-    schema.set('toJSON', returnOptions);
+    let toJSONTransform
+    if (schema.options.toJSON && schema.options.toJSON.transform) {
+        toJSONTransform = schema.options.toJSON.transform;
+    }
+
+    let toObjectTransform
+    if (schema.options.toObject && schema.options.toObject.transform) {
+        toObjectTransform = schema.options.toObject.transform;
+    }
+
+    schema.options.toObject = {
+        ...(schema.options.toObject || {}),
+        transform: (...args) => {
+            if(typeof toObjectTransform === 'function') {
+                toObjectTransform(...args)
+            }
+            return removeFuzzyElements(options.fields)(...args)
+        }
+    }
+
+    schema.options.toJSON = {
+        ...(schema.options.toJSON || {}),
+        transform: (...args) => {
+            if(typeof toJSONTransform === 'function') {
+                toJSONTransform(...args)
+            }
+            return removeFuzzyElements(options.fields)(...args)
+        }
+    }
 
     function saveMiddleware(next) {
         if (this) {
