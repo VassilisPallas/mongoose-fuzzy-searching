@@ -322,16 +322,21 @@ module.exports = function (schema, options) {
 
     createFields(schema, options.fields);
 
-    let transform
+    let toJSONTransform
     if (schema.options.toJSON && schema.options.toJSON.transform) {
-        transform = schema.options.toJSON.transform;
+        toJSONTransform = schema.options.toJSON.transform;
+    }
+
+    let toObjectTransform
+    if (schema.options.toObject && schema.options.toObject.transform) {
+        toObjectTransform = schema.options.toObject.transform;
     }
 
     schema.options.toObject = {
         ...(schema.options.toObject || {}),
         transform: (...args) => {
-            if(typeof transform === 'function') {
-                transform(...args)
+            if(typeof toObjectTransform === 'function') {
+                toObjectTransform(...args)
             }
             return removeFuzzyElements(options.fields)(...args)
         }
@@ -340,8 +345,8 @@ module.exports = function (schema, options) {
     schema.options.toJSON = {
         ...(schema.options.toJSON || {}),
         transform: (...args) => {
-            if(typeof transform === 'function') {
-                transform(...args)
+            if(typeof toJSONTransform === 'function') {
+                toJSONTransform(...args)
             }
             return removeFuzzyElements(options.fields)(...args)
         }

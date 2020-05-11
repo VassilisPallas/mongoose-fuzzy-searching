@@ -567,6 +567,73 @@ describe('new versions of js (with Object.values)', function () {
                 });
             });
         });
+
+        describe('mongoose_fuzzy_searching should run user provided toObject & toJSON', function () {
+            var schema = new Schema(
+                { name: String }, 
+                { 
+                    collection: 'fuzzy_searching_test_14',
+                    toObject: {
+                        transform: function(doc, ret) {
+                            ret.toObjectTest = true
+                            return ret
+                        }
+                    },
+                    toJSON: {
+                        transform: function(doc, ret) {
+                            ret.toJSONTest = true
+                            return ret
+                        }
+                    }
+                });
+            schema.plugin(fuzzy_searching, {
+                fields: [
+                    {
+                        name: "name",
+                        minSize: 2
+                    }
+                ]
+            });
+
+            var User14 = mongoose.model('User14', schema);
+
+            before(function (done) {
+                var user = new User14({ name: 'Joe' });
+
+                user.save(function () {
+                    done();
+                });
+            });
+
+            after(function (done) {
+                mongoose.connection.dropCollection("fuzzy_searching_test_14", function () {
+                    done();
+                });
+            });
+
+            it('Should run user provided toObject and fuzzy searching\'s toObject', function(done) {
+                User14.fuzzySearch('Joe').then(function (result) {
+                    expect(result).to.have.lengthOf(1)
+                    expect(result[0].toObject()).to.have.property('toObjectTest');
+                    expect(result[0].toObject()).to.not.have.property('name_fuzzy');
+                    done();
+                }).catch(function (err) {
+                    done(err)
+                });
+            })
+
+            it('Should run user provided toJSON and fuzzy searching\'s toJSON', function(done) {
+                User14.fuzzySearch('Joe').then(function (result) {
+                    expect(result).to.have.lengthOf(1)
+                    expect(result[0].toJSON()).to.have.property('toJSONTest');
+                    expect(result[0].toJSON()).to.not.have.property('name_fuzzy');
+                    done();
+                }).catch(function (err) {
+                    done(err)
+                });
+            })
+            
+        });
     });
 });
 
