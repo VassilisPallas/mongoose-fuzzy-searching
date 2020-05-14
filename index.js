@@ -68,7 +68,7 @@ module.exports = function (schema, pluginOptions) {
   fields.forEach(validateItem);
 
   const { indexes, weights } = createFields(schema, fields);
-  schema.index(indexes, { weights });
+  schema.index(indexes, { weights, name: 'fuzzy_text' });
 
   const hideElements = removeFuzzyElements(fields);
   const { toJSON, toObject } = setTransformers(hideElements)(schema);

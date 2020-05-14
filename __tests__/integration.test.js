@@ -5,7 +5,6 @@ beforeAll(async () => {
   await db.openConnection();
 });
 afterAll(async () => {
-  await db.dropDatabase();
   await db.closeConnection();
 });
 
@@ -314,11 +313,13 @@ describe('fuzzySearch', () => {
 
   describe('mongoose_fuzzy_searching with `keys` key and single object attribute', () => {
     const Model = db.createSchema({
-      title: {
-        en: String,
-        de: String,
-        it: String,
-      },
+      title: [
+        {
+          en: String,
+          de: String,
+          it: String,
+        },
+      ],
     })(fuzzySearching, [
       {
         name: 'title',
@@ -337,7 +338,7 @@ describe('fuzzySearch', () => {
       });
     });
 
-    it('fuzzySearch() -> should be able to find the title whento the text is `stellari`', async () => {
+    it('fuzzySearch() -> should be able to find the title when the text is `stellari`', async () => {
       const result = await Model.fuzzySearch('stellari');
       expect(result).toHaveLength(1);
     });
