@@ -5,8 +5,25 @@
   "description": "Mongoose fuzzy searching plugin",
   "main": "index.js",
   "scripts": {
-    "test": "mocha ./tests/* -s 0 ",
-    "coverage": "nyc --reporter=html npm test"
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write \"./**/*.{json,js}\"",
+    "lint": "eslint --ext .js \"./**/*.{json,js}\"",
+    "test": "jest --colors --runInBand",
+    "test:watch": "jest --watch --colors"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "linters": {
+      "./**/**/*.{json,js}": [
+        "lint",
+        "format",
+        "git add"
+      ]
+    }
   },
   "keywords": [
     "mongoose",
@@ -26,11 +43,16 @@
     "mongoose": "4.x || 5.x"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
-    "mocha": "^6.1.4",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jest": "^23.11.0",
+    "eslint-plugin-prettier": "^3.1.3",
+    "husky": "^4.2.5",
+    "jest": "^26.0.1",
+    "lint-staged": "^10.2.2",
     "mongoose": "^5.6.4",
-    "nyc": "^14.1.1",
-    "rewire": "^4.0.1"
+    "prettier": "^2.0.5"
   }
 }
