@@ -1,6 +1,6 @@
 ## Description
 
-`A brief explanation synthesising the feature, bug or fix.`
+`A brief explanation synthesizing the feature, bug or fix.`
 
 ## How to test that change
 
