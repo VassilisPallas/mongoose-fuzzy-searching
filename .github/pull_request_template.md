@@ -14,7 +14,7 @@ Fixes https://github.com/VassilisPallas/mongoose-fuzzy-searching/issues/#
 
 Tests
 
-- [ ] I've added integtation tests
+- [ ] I've added integration tests
 - [ ] I've added unit tests
 
 Documentation
