@@ -23,5 +23,5 @@ Documentation
 
 Review process
 
-- [ ] The title is in present tense and includes the JIRA ticket number
+- [ ] The title is in present tense and includes the issue number
 - [ ] I've used [conventional commits](https://www.conventionalcommits.org/)
