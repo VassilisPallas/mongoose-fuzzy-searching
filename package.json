@@ -17,13 +17,10 @@
     }
   },
   "lint-staged": {
-    "linters": {
-      "./**/**/*.{json,js}": [
-        "lint",
-        "format",
-        "git add"
-      ]
-    }
+    "./**/**/*.{json,js}": [
+      "npm run lint",
+      "npm run format"
+    ]
   },
   "keywords": [
     "mongoose",
