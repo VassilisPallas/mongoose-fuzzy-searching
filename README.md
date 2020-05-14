@@ -238,35 +238,17 @@ In other words, thit plugin creates anagrams when you create or update a documen
 In order to create anagrams for pre-existing documents, you should update each document. The below example, updates the `firstName` attribute to every document on the collection `User`.
 
 ```javascript
-const { each, queue } = require('async');
-
 const updateFuzzy = async (Model, attrs) => {
-  const docs = await Model.find();
-
-  const updateToDatabase = async (data, callback) => {
-    try {
-      if (attrs && attrs.length) {
-        const obj = attrs.reduce((acc, attr) => ({ ...acc, [attr]: data[attr] }), {});
-        return Model.findByIdAndUpdate(data._id, obj).exec();
-      }
-
-      return Model.findByIdAndUpdate(data._id, data).exec();
-    } catch (e) {
-      console.log(e);
-    } finally {
-      callback();
+  for await (const doc of Model.find()) {
+    if (attrs && attrs.length) {
+      const obj = attrs.reduce((acc, attr) => ({ ...acc, [attr]: doc[attr] }), {});
+      await Model.findByIdAndUpdate(doc._id, obj);
     }
-  };
-
-  const myQueue = queue(updateToDatabase, 10);
-  each(docs, (data) => myQueue.push(data.toObject()));
-
-  myQueue.empty = function () {};
-  myQueue.drain = function () {};
+  }
 };
 
 // usage
-updateFuzzy(User, ['firstName']);
+await updateFuzzy(User, ['firstName']);
 ```
 
 ### Delete old ngrams from all documents
@@ -274,36 +256,17 @@ updateFuzzy(User, ['firstName']);
 In the previous example, we set `firstName` and `lastName` as the fuzzy attributes. If you remove the `firstName` from the fuzzy fields, the `firstName_fuzzy` array will not be removed by the collection. If you want to remove the array on each document you have to unset that value.
 
 ```javascript
-const { each, queue } = require('async');
-
 const removeUnsedFuzzyElements = (Model, attrs) => {
-    const docs = await Model.find();
-
-    const updateToDatabase = async (data, callback) => {
-        try {
-            const $unset = attrs.reduce((acc, attr) => ({...acc, [`${attr}_fuzzy`]: 1}), {})
-            return Model.findByIdAndUpdate(data._id, { $unset }, { new: true, strict: false }).exec();
-        } catch (e) {
-            console.log(e);
-        } finally {
-            callback();
-        }
-    };
-
-    const myQueue = queue(updateToDatabase, 10);
-
-    each(docs, (data) => myQueue.push(data.toObject()), () => { });
-
-    myQueue.empty = function () {
-    };
-
-    myQueue.drain = function () {
-        console.log("done");
-    };
+    for await (const doc of Model.find()) {
+    if (attrs && attrs.length) {
+      const $unset = attrs.reduce((acc, attr) => ({...acc, [`${attr}_fuzzy`]: 1}), {})
+      await Model.findByIdAndUpdate(data._id, { $unset }, { new: true, strict: false });
+    }
+  }
 }
 
 // usage
-removeUnsedFuzzyElements(User, ['firstName']);
+await removeUnsedFuzzyElements(User, ['firstName']);
 ```
 
 ## License
