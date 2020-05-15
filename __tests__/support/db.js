@@ -1,15 +1,20 @@
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
-
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const mongod = new MongoMemoryServer();
 
 let dbNum = 0;
 
+const getURL = () => {
+  return process.env.MONGO_DB
+    ? 'mongodb://localhost:27017/fuzzy-test'
+    : mongod.getConnectionString();
+};
+
 const openConnection = async () => {
-  const uri = await mongod.getConnectionString();
+  const uri = await getURL();
 
   const mongooseOpts = {
     useNewUrlParser: true,

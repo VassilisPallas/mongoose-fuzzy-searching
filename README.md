@@ -240,10 +240,8 @@ In order to create anagrams for pre-existing documents, you should update each d
 ```javascript
 const updateFuzzy = async (Model, attrs) => {
   for await (const doc of Model.find()) {
-    if (attrs && attrs.length) {
-      const obj = attrs.reduce((acc, attr) => ({ ...acc, [attr]: doc[attr] }), {});
-      await Model.findByIdAndUpdate(doc._id, obj);
-    }
+    const obj = attrs.reduce((acc, attr) => ({ ...acc, [attr]: doc[attr] }), {});
+    await Model.findByIdAndUpdate(doc._id, obj);
   }
 };
 
@@ -258,15 +256,45 @@ In the previous example, we set `firstName` and `lastName` as the fuzzy attribut
 ```javascript
 const removeUnsedFuzzyElements = (Model, attrs) => {
     for await (const doc of Model.find()) {
-    if (attrs && attrs.length) {
       const $unset = attrs.reduce((acc, attr) => ({...acc, [`${attr}_fuzzy`]: 1}), {})
       await Model.findByIdAndUpdate(data._id, { $unset }, { new: true, strict: false });
-    }
   }
 }
 
 // usage
 await removeUnsedFuzzyElements(User, ['firstName']);
+```
+
+### Testing and code coverage
+
+#### All tests
+
+We use Jest for all of our unit and integration tests.
+
+```bash
+$ npm test
+```
+
+_Note: this will run all suites **serially** to avoid mutliple concurrent connection on the db._
+
+This will ruin the tests using a memory database. If you wih for any reason to run the tests using an actual connection on a mongo instance, add the environment variable `MONGO_DB`:
+
+```bash
+$ MONGO_DB=true npm test
+```
+
+### Available test suites
+
+#### unit tests
+
+```bash
+$ npm run test:unit
+```
+
+#### Integration tests
+
+```bash
+$ npm run test:integration
 ```
 
 ## License

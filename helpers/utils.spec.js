@@ -1,3 +1,7 @@
+/**
+ * @group unit
+ */
+
 const { replaceSymbols, isFunction, isObject, isString } = require('./utils');
 
 describe('replaceSymbols', () => {

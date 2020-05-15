@@ -51,7 +51,13 @@ class Generate {
 
   fromString(item) {
     if (this.attributes[item]) {
-      this.attributes[`${item}_fuzzy`] = this.makeNGrams(this.attributes[item]);
+      let value = this.attributes[item];
+
+      if (Array.isArray(value)) {
+        value = value.join(' ');
+      }
+
+      this.attributes[`${item}_fuzzy`] = this.makeNGrams(value);
     }
   }
 

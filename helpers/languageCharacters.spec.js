@@ -1,3 +1,7 @@
+/**
+ * @group unit
+ */
+
 const languageCharacters = require('./languageCharacters');
 
 describe('languageCharacters', () => {

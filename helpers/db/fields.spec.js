@@ -1,3 +1,7 @@
+/**
+ * @group unit
+ */
+
 const { createByFieldType, createFields, createNGrams, removeFuzzyElements } = require('./fields');
 
 describe('createByFieldType', () => {

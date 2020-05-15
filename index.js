@@ -32,7 +32,7 @@ const parseArguments = (args, i1, i2) => {
 };
 
 const validateItem = (item) => {
-  if (isObject(item) && item.keys && !Array.isArray(item.keys) && typeof item.keys !== 'string') {
+  if (isObject(item) && item.keys && !Array.isArray(item.keys) && !isString(item.keys)) {
     throw new TypeError('Key must be an array or a string.');
   }
 };

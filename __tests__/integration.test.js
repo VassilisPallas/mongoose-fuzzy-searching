@@ -1,3 +1,7 @@
+/**
+ * @group integration
+ */
+
 const fuzzySearching = require('..');
 const db = require('./support/db');
 
@@ -386,6 +390,27 @@ describe('fuzzySearch', () => {
       expect(result).toHaveLength(1);
       expect(result[0].toJSON()).toHaveProperty('toJSONTest');
       expect(result[0].toJSON()).not.toHaveProperty('name_fuzzy');
+    });
+  });
+
+  describe('mongoose_fuzzy_searching with array of strings', () => {
+    const Model = db.createSchema({
+      tags: [String],
+    })(fuzzySearching, ['tags']);
+
+    beforeAll(async () => {
+      await db.seed(Model, {
+        tags: ['nature', 'fire', 'beauty'],
+      });
+
+      await db.seed(Model, {
+        tags: ['test1', 'test2', 'test3'],
+      });
+    });
+
+    it('fuzzySearch() -> should be able to find the tag when the text is `nature`', async () => {
+      const result = await Model.fuzzySearch('nature');
+      expect(result).toHaveLength(1);
     });
   });
 });
