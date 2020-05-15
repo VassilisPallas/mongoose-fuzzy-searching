@@ -1,3 +1,7 @@
+/**
+ * @group unit
+ */
+
 const plugin = require('.');
 
 describe('fuzzy search', () => {
