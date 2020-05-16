@@ -22,6 +22,8 @@ First off, thanks for taking the time to contribute!
 
 - PR title should contains the issue number with the title. Eg bug(ISS-30): Fix indices issue
 
+- PR should be has `develop` as a base, not `master`.
+
 #### **Do you intend to add a new feature or change an existing one?**
 
 - Drop me an email at vspallas@gmail.com and start writing code.
