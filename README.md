@@ -118,6 +118,8 @@ The below table contains the expected keys for an object
 | escapeSpecialCharacters | **Boolean**       | true        | Remove special characters from N-grams.                                                                                                                                                                                  |
 | keys                    | **Array[String]** | null        | If the type of the collection attribute is `Object` or `[Object]` (see example), you can define which attributes will be used for fuzzy searching                                                                        |
 
+|
+
 Example:
 
 ```javascript
@@ -200,10 +202,10 @@ UserSchema.plugin(mongoose_fuzzy_searching, {
   fields: ['firstName'],
   middlewares: {
     preSave: function() {
-      ...
+      // login here
     },
-    preUpdateOne: function {
-      ...
+    preUpdateOne: async function {
+      // can also pass promises
     }
   }
 });
@@ -222,6 +224,9 @@ The below table contains the expected keys for the first parameter (if is an obj
 | query      | **String**  | null        | String to search                                                                  |
 | minSize    | **Integer** | 2           | N-grams min size.                                                                 |
 | prefixOnly | **Boolean** | false       | Only return ngrams from start of word. (It gives more precise results) the prefix |
+| exact      | **Boolean** | false       | Matches on a phrase, as opposed to individual terms                               |
+
+|
 
 Example:
 
@@ -322,7 +327,7 @@ $ npm test
 
 _Note: this will run all suites **serially** to avoid mutliple concurrent connection on the db._
 
-This will run the tests using a memory database. If you wih for any reason to run the tests using an actual connection on a mongo instance, add the environment variable `MONGO_DB`:
+This will run the tests using a memory database. If you wish for any reason to run the tests using an actual connection on a mongo instance, add the environment variable `MONGO_DB`:
 
 ```bash
 $ MONGO_DB=true npm test

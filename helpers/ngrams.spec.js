@@ -59,6 +59,7 @@ describe('makeNGrams', () => {
         'joe',
         'do',
         'doe',
+        'joe doe',
       ]);
     });
   });
@@ -68,6 +69,7 @@ describe('makeNGrams', () => {
       expect(makeNGrams(constant, replaceSymbols)('Joe Doe', false, 3)).toStrictEqual([
         'joe',
         'doe',
+        'joe doe',
       ]);
     });
   });
@@ -80,6 +82,7 @@ describe('makeNGrams', () => {
         'joe',
         'do',
         'doe',
+        'joe doe',
       ]);
     });
   });

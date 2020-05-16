@@ -8,6 +8,7 @@ const db = require('./support/db');
 beforeAll(async () => {
   await db.openConnection();
 });
+
 afterAll(async () => {
   await db.closeConnection();
 });
@@ -208,6 +209,59 @@ describe('fuzzySearch', () => {
       it('fuzzySearch() -> should be able to find the title when the text is `this is`', async () => {
         const result = await Model.fuzzySearch('this is');
         expect(result).toHaveLength(1);
+      });
+    });
+
+    describe('mongoose_fuzzy_searching with single object attribute', () => {
+      const Model = db.createSchema({
+        title: [
+          {
+            en: String,
+            de: String,
+            it: String,
+          },
+        ],
+      })(fuzzySearching, [
+        {
+          name: 'title',
+          escapeSpecialCharacters: false,
+          keys: ['en', 'de', 'it'],
+        },
+      ]);
+
+      beforeAll(async () => {
+        await db.seed(Model, {
+          title: {
+            en: 'start wars',
+            de: 'Krieg der Sterne',
+            it: 'guerre stellari',
+          },
+        });
+      });
+
+      it('fuzzySearch() -> should be able to find the title when the text is `stellari`', async () => {
+        const result = await Model.fuzzySearch('stellari');
+        expect(result).toHaveLength(1);
+      });
+    });
+  });
+
+  describe('mongoose_fuzzy_searching with `exact` option', () => {
+    describe('mongoose_fuzzy_searching with array of objects attribute', () => {
+      const Model = db.createSchema({
+        name: String,
+      })(fuzzySearching, ['name']);
+
+      beforeAll(async () => {
+        await Model.insertMany([{ name: 'Peter Pan' }, { name: 'Peter Ofori-Quaye' }]);
+      });
+
+      it('fuzzySearch() -> should be able to find the title when the text is `Peter Pan`', async () => {
+        const exactResult = await Model.fuzzySearch({ query: 'Peter Pan', exact: true });
+        const fuzzyResult = await Model.fuzzySearch({ query: 'Peter Pan' });
+
+        expect(exactResult).toHaveLength(1);
+        expect(fuzzyResult).toHaveLength(2);
       });
     });
 
@@ -452,7 +506,7 @@ describe('fuzzySearch', () => {
     });
   });
 
-  describe('mongoose_fuzzy_searching custom pre middlewares', () => {
+  describe('mongoose_fuzzy_searching custom `pre` middlewares', () => {
     const schema = { name: String, age: Number, skill: String };
 
     it('should call `preSave`', async () => {
@@ -643,6 +697,37 @@ describe('fuzzySearch', () => {
       expect(preSave.mock.invocationCallOrder[0]).toBeLessThan(
         preUpdate.mock.invocationCallOrder[0],
       );
+      expect(result[0]).toHaveProperty('skill', 'amazing');
+    });
+
+    it('should call promise', async () => {
+      const preSave = jest.fn().mockImplementation(async function () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.skill = 'amazing';
+            resolve();
+          }, 2000);
+        });
+      });
+
+      const Model = db.createSchema(schema)(
+        fuzzySearching,
+        [
+          {
+            name: 'name',
+            minSize: 2,
+          },
+        ],
+        {
+          preSave,
+        },
+      );
+
+      await db.seed(Model, { name: 'Joe', age: 30 });
+
+      const result = await Model.fuzzySearch({ query: 'jo' });
+      expect(result).toHaveLength(1);
+      expect(preSave).toHaveBeenCalledTimes(1);
       expect(result[0]).toHaveProperty('skill', 'amazing');
     });
   });

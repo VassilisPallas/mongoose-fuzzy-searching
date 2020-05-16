@@ -102,47 +102,54 @@ module.exports = function (schema, pluginOptions) {
     toJSON,
   };
 
+  function thenable(fn, cb, attr) {
+    if (!fn) {
+      return cb();
+    }
+
+    return Promise.resolve(fn.bind(this)(attr)).then(cb);
+  }
+
   function saveMiddleware(next) {
-    createNGrams(this, fields);
-    next();
+    const attributes = this;
+    return function () {
+      createNGrams(attributes, fields);
+      next();
+    };
   }
 
   function updateMiddleware(next) {
-    createNGrams(this._update, fields);
-    next();
+    const attributes = this._update;
+    return function () {
+      createNGrams(attributes, fields);
+      next();
+    };
   }
 
   function insertMany(next, docs) {
-    docs.forEach((doc) => {
-      createNGrams(doc, fields);
-    });
-    next();
+    return function () {
+      docs.forEach((doc) => {
+        createNGrams(doc, fields);
+      });
+      next();
+    };
   }
 
   function preUpdate(fnName) {
     const fn = getMiddleware(middlewares, fnName);
     return function (next) {
-      if (fn) {
-        fn.bind(this)();
-      }
-      updateMiddleware.bind(this)(next);
+      return thenable.bind(this)(fn, updateMiddleware.bind(this)(next));
     };
   }
 
   schema.pre('save', function (next) {
     const fn = getMiddleware(middlewares, 'preSave');
-    if (fn) {
-      fn.bind(this)();
-    }
-    saveMiddleware.bind(this)(next);
+    return thenable.bind(this)(fn, saveMiddleware.bind(this)(next));
   });
 
   schema.pre('insertMany', function (next, docs) {
     const fn = getMiddleware(middlewares, 'preInsertMany');
-    if (fn) {
-      fn.bind(this)(docs);
-    }
-    insertMany.bind(this)(next, docs);
+    return thenable.bind(this)(fn, insertMany.bind(this)(next, docs), docs);
   });
 
   schema.pre('update', preUpdate('preUpdate'));
@@ -162,6 +169,7 @@ module.exports = function (schema, pluginOptions) {
     }
 
     const queryString = isObject(queryArgs[0]) ? queryArgs[0].query : queryArgs[0];
+    const exact = isObject(queryArgs[0]) ? !!queryArgs[0].exact : false;
 
     if (!queryString) {
       return Model.find.apply(this);
@@ -169,7 +177,9 @@ module.exports = function (schema, pluginOptions) {
 
     const { checkPrefixOnly, defaultNgamMinSize } = getDefaultValues(queryArgs[0]);
 
-    const query = nGrams(queryString, false, defaultNgamMinSize, checkPrefixOnly).join(' ');
+    const query = exact
+      ? `"${queryString}"`
+      : nGrams(queryString, false, defaultNgamMinSize, checkPrefixOnly).join(' ');
 
     const { callback, options } = parseArguments(queryArgs, 1, 2);
 
