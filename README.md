@@ -118,6 +118,8 @@ The below table contains the expected keys for an object
 | escapeSpecialCharacters | **Boolean**       | true        | Remove special characters from N-grams.                                                                                                                                                                                  |
 | keys                    | **Array[String]** | null        | If the type of the collection attribute is `Object` or `[Object]` (see example), you can define which attributes will be used for fuzzy searching                                                                        |
 
+|
+
 Example:
 
 ```javascript
@@ -222,6 +224,9 @@ The below table contains the expected keys for the first parameter (if is an obj
 | query      | **String**  | null        | String to search                                                                  |
 | minSize    | **Integer** | 2           | N-grams min size.                                                                 |
 | prefixOnly | **Boolean** | false       | Only return ngrams from start of word. (It gives more precise results) the prefix |
+| exact      | **Boolean** | false       | Matches on a phrase, as opposed to individual terms                               |
+
+|
 
 Example:
 
