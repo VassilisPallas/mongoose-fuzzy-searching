@@ -202,10 +202,10 @@ UserSchema.plugin(mongoose_fuzzy_searching, {
   fields: ['firstName'],
   middlewares: {
     preSave: function() {
-      ...
+      // login here
     },
-    preUpdateOne: function {
-      ...
+    preUpdateOne: async function {
+      // can also pass promises
     }
   }
 });
