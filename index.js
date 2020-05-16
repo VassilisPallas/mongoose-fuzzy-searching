@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { Model } = mongoose;
 
 const {
-  config: { DEFAULT_MIN_SIZE, DEFAULT_PREFIX_ONLY },
+  config: { DEFAULT_MIN_SIZE, DEFAULT_PREFIX_ONLY, validMiddlewares },
   createFields,
   createNGrams,
   isFunction,
@@ -32,9 +32,31 @@ const parseArguments = (args, i1, i2) => {
 };
 
 const validateItem = (item) => {
-  if (isObject(item) && item.keys && !Array.isArray(item.keys) && typeof item.keys !== 'string') {
+  if (isObject(item) && item.keys && !Array.isArray(item.keys) && !isString(item.keys)) {
     throw new TypeError('Key must be an array or a string.');
   }
+};
+
+const validateMiddlewares = (middlewares) => {
+  if (!middlewares) {
+    return;
+  }
+
+  if (!isObject(middlewares)) {
+    throw new TypeError('Middlewares must be an object.');
+  }
+
+  if (!Object.keys(middlewares).every((key) => validMiddlewares.includes(key))) {
+    throw new TypeError(`Middleware key should be one of: [${validMiddlewares.join(', ')}].`);
+  }
+
+  if (!Object.values(middlewares).every(isFunction)) {
+    throw new TypeError('Middleware must be a Function.');
+  }
+};
+
+const getMiddleware = (middlewares, name) => {
+  return middlewares && middlewares[name] ? middlewares[name] : null;
 };
 
 const getDefaultValues = (item) => {
@@ -59,13 +81,14 @@ module.exports = function (schema, pluginOptions) {
     throw new Error('You must set at least one field for fuzzy search.');
   }
 
-  const { fields } = pluginOptions;
+  const { fields, middlewares } = pluginOptions;
 
   if (!Array.isArray(fields)) {
     throw new TypeError('Fields must be an array.');
   }
 
   fields.forEach(validateItem);
+  validateMiddlewares(middlewares);
 
   const { indexes, weights } = createFields(schema, fields);
   schema.index(indexes, { weights, name: 'fuzzy_text' });
@@ -80,17 +103,13 @@ module.exports = function (schema, pluginOptions) {
   };
 
   function saveMiddleware(next) {
-    if (this) {
-      createNGrams(this, fields);
-      next();
-    }
+    createNGrams(this, fields);
+    next();
   }
 
   function updateMiddleware(next) {
-    if (this._update) {
-      createNGrams(this._update, fields);
-      next();
-    }
+    createNGrams(this._update, fields);
+    next();
   }
 
   function insertMany(next, docs) {
@@ -100,11 +119,39 @@ module.exports = function (schema, pluginOptions) {
     next();
   }
 
-  schema.pre('save', saveMiddleware);
-  schema.pre('update', updateMiddleware);
-  schema.pre('findOneAndUpdate', updateMiddleware);
-  schema.pre('insertMany', insertMany);
-  schema.pre('updateMany', updateMiddleware);
+  function preUpdate(fnName) {
+    const fn = getMiddleware(middlewares, fnName);
+    return function (next) {
+      if (fn) {
+        fn.bind(this)();
+      }
+      updateMiddleware.bind(this)(next);
+    };
+  }
+
+  schema.pre('save', function (next) {
+    const fn = getMiddleware(middlewares, 'preSave');
+    if (fn) {
+      fn.bind(this)();
+    }
+    saveMiddleware.bind(this)(next);
+  });
+
+  schema.pre('insertMany', function (next, docs) {
+    const fn = getMiddleware(middlewares, 'preInsertMany');
+    if (fn) {
+      fn.bind(this)(docs);
+    }
+    insertMany.bind(this)(next, docs);
+  });
+
+  schema.pre('update', preUpdate('preUpdate'));
+
+  schema.pre('updateOne', preUpdate('preUpdateOne'));
+
+  schema.pre('findOneAndUpdate', preUpdate('preFindOneAndUpdate'));
+
+  schema.pre('updateMany', preUpdate('preUpdateMany'));
 
   schema.statics.fuzzySearch = function (...args) {
     const queryArgs = Object.values(args);

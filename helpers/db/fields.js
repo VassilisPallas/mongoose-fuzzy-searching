@@ -51,7 +51,13 @@ class Generate {
 
   fromString(item) {
     if (this.attributes[item]) {
-      this.attributes[`${item}_fuzzy`] = this.makeNGrams(this.attributes[item]);
+      let value = this.attributes[item];
+
+      if (Array.isArray(value)) {
+        value = value.join(' ');
+      }
+
+      this.attributes[`${item}_fuzzy`] = this.makeNGrams(value);
     }
   }
 
@@ -145,6 +151,9 @@ const removeFuzzyElements = (createField) => (fields) => (_doc, ret) => {
  * @param {array} fields
  */
 const createNGrams = (makeNGrams, createField) => (attributes, fields) => {
+  if (!attributes) {
+    return;
+  }
   const generate = new Generate(attributes, makeNGrams);
   fields.forEach(createField(generate));
 };

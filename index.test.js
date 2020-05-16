@@ -1,4 +1,9 @@
+/**
+ * @group unit
+ */
+
 const plugin = require('.');
+const { validMiddlewares } = require('./helpers/config');
 
 describe('fuzzy search', () => {
   const schema = {
@@ -33,5 +38,38 @@ describe('fuzzy search', () => {
         ],
       }),
     ).toThrow('Key must be an array or a string.');
+  });
+
+  it('should return TypeError when middlewares are not an Object', () => {
+    expect(
+      plugin.bind(this, schema, {
+        fields: ['name'],
+        middlewares: [1, 2, 3],
+      }),
+    ).toThrow('Middlewares must be an object.');
+  });
+
+  it('should return TypeError when a middleware is not a function', () => {
+    expect(
+      plugin.bind(this, schema, {
+        fields: ['name'],
+        middlewares: {
+          preSave: () => {},
+          preUpdate: 'test',
+        },
+      }),
+    ).toThrow('Middleware must be a Function.');
+  });
+
+  it('should return TypeError when a middleware key is invalid', () => {
+    expect(
+      plugin.bind(this, schema, {
+        fields: ['name'],
+        middlewares: {
+          preSave: () => {},
+          somethingElse: () => {},
+        },
+      }),
+    ).toThrow(`Middleware key should be one of: [${validMiddlewares.join(', ')}].`);
   });
 });
