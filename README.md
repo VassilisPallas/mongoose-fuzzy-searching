@@ -4,6 +4,7 @@ mongoose-fuzzy-searching is simple and lightweight plugin that enables fuzzy sea
 This code is based on [this article](https://medium.com/xeneta/fuzzy-search-with-mongodb-and-python-57103928ee5d).
 
 [![Build Status](https://travis-ci.com/VassilisPallas/mongoose-fuzzy-searching.svg?token=iwmbqGL1Zp9rkA7hmQ6P&branch=master)](https://travis-ci.com/VassilisPallas/mongoose-fuzzy-searching)
+[![codecov](https://codecov.io/gh/VassilisPallas/mongoose-fuzzy-searching/branch/master/graph/badge.svg)](https://codecov.io/gh/VassilisPallas/mongoose-fuzzy-searching)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FVassilisPallas%2Fmongoose-fuzzy-searching.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FVassilisPallas%2Fmongoose-fuzzy-searching?ref=badge_shield)
 
@@ -75,7 +76,11 @@ try {
 
 ### Plugin Options
 
-Options must have a `fields` key, which is an Array of `Strings` or an Array of `Objects`.
+Options can contain two attributes, `fields` and `middlewares`.
+
+#### Fields
+
+Fields attribute is mandatory and should be either an array of `Strings` or an array of `Objects`.
 
 ```javascript
 const mongoose_fuzzy_searching = require('mongoose-fuzzy-searching');
@@ -100,7 +105,7 @@ UserSchema.plugin(mongoose_fuzzy_searching, {
 });
 ```
 
-#### Object keys
+##### Object keys
 
 The below table contains the expected keys for an object
 
@@ -161,6 +166,46 @@ UserSchema.plugin(mongoose_fuzzy_searching, {
       keys: ['title', 'language'],
     },
   ],
+});
+```
+
+#### Middlewares
+
+Middlewares is an optional `Object` that can contain custom `pre` middlewares. This plugin is using some middlewares in order to create or update the fuzzy elements. That means that if you add `pre` middlewares, they will never get called since the plugin overrides them. To avoid that problem you can pass your custom midlewares into the plugin. Your middlewares will be called **first**. The middlewares you can pass are:
+
+- preSave
+  - stands for schema.pre("save", ...)
+- preInsertMany
+  - stands for schema.pre("insertMany", ...)
+- preUpdate
+  - stands for schema.pre("update", ...)
+- preUpdateOne
+  - stands for schema.pre("updateOne", ...)
+- preFindOneAndUpdate
+  - stands for schema.pre("findOneAndUpdate", ...)
+- preUpdateMany
+  - stands for schema.pre("updateMany", ...)
+
+If you want to add any other middleware othen than the above ones, you can add it directly on the schema.
+
+```javascript
+const mongoose_fuzzy_searching = require('mongoose-fuzzy-searching');
+
+const UserSchema = new Schema({
+  firstName: String,
+  lastName: String,
+});
+
+UserSchema.plugin(mongoose_fuzzy_searching, {
+  fields: ['firstName'],
+  middlewares: {
+    preSave: function() {
+      ...
+    },
+    preUpdateOne: function {
+      ...
+    }
+  }
 });
 ```
 
@@ -277,7 +322,7 @@ $ npm test
 
 _Note: this will run all suites **serially** to avoid mutliple concurrent connection on the db._
 
-This will ruin the tests using a memory database. If you wih for any reason to run the tests using an actual connection on a mongo instance, add the environment variable `MONGO_DB`:
+This will run the tests using a memory database. If you wih for any reason to run the tests using an actual connection on a mongo instance, add the environment variable `MONGO_DB`:
 
 ```bash
 $ MONGO_DB=true npm test

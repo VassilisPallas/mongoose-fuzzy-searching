@@ -22,6 +22,8 @@ First off, thanks for taking the time to contribute!
 
 - PR title should contains the issue number with the title. Eg bug(ISS-30): Fix indices issue
 
+- PR should be has `develop` as a base, not `master`.
+
 #### **Do you intend to add a new feature or change an existing one?**
 
 - Drop me an email at vspallas@gmail.com and start writing code.
@@ -31,3 +33,7 @@ First off, thanks for taking the time to contribute!
 You can also take a look at the [Trello board](https://trello.com/b/Gf6cmkvA/mongoose-fuzzy-searching) and add new ideas on the backlog.
 
 Thanks!
+
+#### **Testing and Coverage**
+
+Every new feature and every bug should have tests as evidence. The coverage must stay 100%. If not, the PR will not be approved.

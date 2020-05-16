@@ -36,13 +36,14 @@ const closeConnection = async () => {
   await mongod.stop();
 };
 
-const createSchema = (schemaStructure, options = {}) => (plugin, fields) => {
+const createSchema = (schemaStructure, options = {}) => (plugin, fields, middlewares) => {
   const schema = new Schema(schemaStructure, {
     collection: `fuzzy_searching_test_${++dbNum}`,
     ...options,
   });
   schema.plugin(plugin, {
     fields,
+    middlewares,
   });
 
   return mongoose.model(`Model${dbNum}`, schema);

@@ -9,11 +9,11 @@
     "format": "prettier --write \"./**/*.{json,js}\"",
     "lint": "eslint --ext .js \"./**/*.{json,js}\"",
     "test": "jest --colors --runInBand",
-    "test:watch": "npm run test -- --watch",
-    "test:unit": "npm run test -- --group=unit",
-    "test:unit:watch": "npm run test:unit -- --watch",
-    "test:integration": "npm run test -- --group=integration",
-    "test:integration:watch": "npm run test:integration -- --watch"
+    "test:watch": "npm test -- --watch",
+    "test:unit": "npm test -- --group=unit",
+    "test:unit:watch": "npm test:unit -- --watch",
+    "test:integration": "npm test -- --group=integration",
+    "test:integration:watch": "npm test:integration -- --watch"
   },
   "husky": {
     "hooks": {

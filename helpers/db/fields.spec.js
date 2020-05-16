@@ -171,4 +171,26 @@ describe('createNGrams', () => {
       ],
     });
   });
+
+  it('should not create ngrams if attributes is undefined', () => {
+    attributes = undefined;
+    fields = [
+      'test',
+      { keys: ['key_test_1', 'key_test_2'], name: 'some__key_name' },
+      { name: 'some_name', weight: 10 },
+    ];
+
+    createField = (obj) => (item, index) => {
+      if (index === 0) {
+        obj.fromString(item);
+      } else if (index === 1) {
+        obj.fromObjectKeys(item);
+      } else {
+        obj.fromObject(item);
+      }
+    };
+
+    createNGrams(makeNGrams, createField)(attributes, fields);
+    expect(attributes).toStrictEqual(undefined);
+  });
 });
