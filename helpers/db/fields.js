@@ -151,6 +151,9 @@ const removeFuzzyElements = (createField) => (fields) => (_doc, ret) => {
  * @param {array} fields
  */
 const createNGrams = (makeNGrams, createField) => (attributes, fields) => {
+  if (!attributes) {
+    return;
+  }
   const generate = new Generate(attributes, makeNGrams);
   fields.forEach(createField(generate));
 };

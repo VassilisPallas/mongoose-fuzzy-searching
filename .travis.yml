@@ -1,5 +1,8 @@
 language: node_js
 node_js: [14, 13, 12, 11, 10]
+install:
+  - npm install -g codecov
 script:
   - 'npm run lint'
   - 'npm test'
+  - codecov

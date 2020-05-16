@@ -31,3 +31,7 @@ First off, thanks for taking the time to contribute!
 You can also take a look at the [Trello board](https://trello.com/b/Gf6cmkvA/mongoose-fuzzy-searching) and add new ideas on the backlog.
 
 Thanks!
+
+#### **Testing and Coverage**
+
+Every new feature and every bug should have tests as evidence. The coverage must stay 100%. If not, the PR will not be approved.

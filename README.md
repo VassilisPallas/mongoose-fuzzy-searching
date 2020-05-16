@@ -75,7 +75,11 @@ try {
 
 ### Plugin Options
 
-Options must have a `fields` key, which is an Array of `Strings` or an Array of `Objects`.
+Options can contain two attributes, `fields` and `middlewares`.
+
+#### Fields
+
+Fields attribute is mandatory and should be either an array of `Strings` or an array of `Objects`.
 
 ```javascript
 const mongoose_fuzzy_searching = require('mongoose-fuzzy-searching');
@@ -100,7 +104,7 @@ UserSchema.plugin(mongoose_fuzzy_searching, {
 });
 ```
 
-#### Object keys
+##### Object keys
 
 The below table contains the expected keys for an object
 
@@ -161,6 +165,46 @@ UserSchema.plugin(mongoose_fuzzy_searching, {
       keys: ['title', 'language'],
     },
   ],
+});
+```
+
+#### Middlewares
+
+Middlewares is an optional `Object` that can contain custom `pre` middlewares. This plugin is using some middlewares in order to create or update the fuzzy elements. That means that if you add `pre` middlewares, they will never get called since the plugin overrides them. To avoid that problem you can pass your custom midlewares into the plugin. Your middlewares will be called **first**. The middlewares you can pass are:
+
+- preSave
+  - stands for schema.pre("save", ...)
+- preInsertMany
+  - stands for schema.pre("insertMany", ...)
+- preUpdate
+  - stands for schema.pre("update", ...)
+- preUpdateOne
+  - stands for schema.pre("updateOne", ...)
+- preFindOneAndUpdate
+  - stands for schema.pre("findOneAndUpdate", ...)
+- preUpdateMany
+  - stands for schema.pre("updateMany", ...)
+
+If you want to add any other middleware othen than the above ones, you can add it directly on the schema.
+
+```javascript
+const mongoose_fuzzy_searching = require('mongoose-fuzzy-searching');
+
+const UserSchema = new Schema({
+  firstName: String,
+  lastName: String,
+});
+
+UserSchema.plugin(mongoose_fuzzy_searching, {
+  fields: ['firstName'],
+  middlewares: {
+    preSave: function() {
+      ...
+    },
+    preUpdateOne: function {
+      ...
+    }
+  }
 });
 ```
 
@@ -277,7 +321,7 @@ $ npm test
 
 _Note: this will run all suites **serially** to avoid mutliple concurrent connection on the db._
 
-This will ruin the tests using a memory database. If you wih for any reason to run the tests using an actual connection on a mongo instance, add the environment variable `MONGO_DB`:
+This will run the tests using a memory database. If you wih for any reason to run the tests using an actual connection on a mongo instance, add the environment variable `MONGO_DB`:
 
 ```bash
 $ MONGO_DB=true npm test
