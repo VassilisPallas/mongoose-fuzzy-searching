@@ -245,6 +245,59 @@ describe('fuzzySearch', () => {
     });
   });
 
+  describe('mongoose_fuzzy_searching with `exact` option', () => {
+    describe('mongoose_fuzzy_searching with array of objects attribute', () => {
+      const Model = db.createSchema({
+        name: String,
+      })(fuzzySearching, ['name']);
+
+      beforeAll(async () => {
+        await Model.insertMany([{ name: 'Peter Pan' }, { name: 'Peter Ofori-Quaye' }]);
+      });
+
+      it('fuzzySearch() -> should be able to find the title when the text is `Peter Pan`', async () => {
+        const exactResult = await Model.fuzzySearch({ query: 'Peter Pan', exact: true });
+        const fuzzyResult = await Model.fuzzySearch({ query: 'Peter Pan' });
+
+        expect(exactResult).toHaveLength(1);
+        expect(fuzzyResult).toHaveLength(2);
+      });
+    });
+
+    describe('mongoose_fuzzy_searching with single object attribute', () => {
+      const Model = db.createSchema({
+        title: [
+          {
+            en: String,
+            de: String,
+            it: String,
+          },
+        ],
+      })(fuzzySearching, [
+        {
+          name: 'title',
+          escapeSpecialCharacters: false,
+          keys: ['en', 'de', 'it'],
+        },
+      ]);
+
+      beforeAll(async () => {
+        await db.seed(Model, {
+          title: {
+            en: 'start wars',
+            de: 'Krieg der Sterne',
+            it: 'guerre stellari',
+          },
+        });
+      });
+
+      it('fuzzySearch() -> should be able to find the title when the text is `stellari`', async () => {
+        const result = await Model.fuzzySearch('stellari');
+        expect(result).toHaveLength(1);
+      });
+    });
+  });
+
   describe('mongoose_fuzzy_searching should run user provided toObject & toJSON', () => {
     const Model = db.createSchema(
       { name: String },

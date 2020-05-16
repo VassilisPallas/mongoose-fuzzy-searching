@@ -162,6 +162,7 @@ module.exports = function (schema, pluginOptions) {
     }
 
     const queryString = isObject(queryArgs[0]) ? queryArgs[0].query : queryArgs[0];
+    const exact = isObject(queryArgs[0]) ? !!queryArgs[0].exact : false;
 
     if (!queryString) {
       return Model.find.apply(this);
@@ -169,7 +170,9 @@ module.exports = function (schema, pluginOptions) {
 
     const { checkPrefixOnly, defaultNgamMinSize } = getDefaultValues(queryArgs[0]);
 
-    const query = nGrams(queryString, false, defaultNgamMinSize, checkPrefixOnly).join(' ');
+    const query = exact
+      ? `"${queryString}"`
+      : nGrams(queryString, false, defaultNgamMinSize, checkPrefixOnly).join(' ');
 
     const { callback, options } = parseArguments(queryArgs, 1, 2);
 
