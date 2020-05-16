@@ -1,3 +1,11 @@
+const addWholePhrase = (arr, text) => {
+  if (text.split(' ').length > 1) {
+    return [...arr, text.toLowerCase()];
+  }
+
+  return arr;
+};
+
 /**
  * Creates sequence of characters taken from the given string.
  * @param {string} text - The string for the sequence.
@@ -77,7 +85,7 @@ const makeNGrams = (constants, replaceSymbols) => (
       ),
     )
     .reduce((acc, arr) => acc.concat(arr), []);
-  return Array.from(new Set(result));
+  return addWholePhrase(Array.from(new Set(result)), text);
 };
 
 module.exports = { nGrams, makeNGrams };

@@ -1,6 +1,15 @@
+# CI
+.travis.yml
+
+# Linter
+.eslintignore
+.eslintrc.json
+.prettierrc
+
 # IDE
 .idea
 .vscode
+
 # Logs
 logs
 *.log
@@ -20,8 +29,9 @@ lib-cov
 # Coverage directory used by tools like istanbul
 coverage
 
-# nyc test coverage
+# test
 .nyc_output
+jest.config.js
 
 # Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
@@ -124,4 +134,3 @@ typings/
 
 # next.js build output
 .next
-

@@ -322,7 +322,7 @@ $ npm test
 
 _Note: this will run all suites **serially** to avoid mutliple concurrent connection on the db._
 
-This will run the tests using a memory database. If you wih for any reason to run the tests using an actual connection on a mongo instance, add the environment variable `MONGO_DB`:
+This will run the tests using a memory database. If you wish for any reason to run the tests using an actual connection on a mongo instance, add the environment variable `MONGO_DB`:
 
 ```bash
 $ MONGO_DB=true npm test

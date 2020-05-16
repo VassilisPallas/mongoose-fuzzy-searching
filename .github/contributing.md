@@ -30,10 +30,10 @@ First off, thanks for taking the time to contribute!
 
 - Do not open an issue on GitHub until you have collected positive feedback about the change. GitHub issues are primarily intended for bug reports and fixes.
 
-You can also take a look at the [Trello board](https://trello.com/b/Gf6cmkvA/mongoose-fuzzy-searching) and add new ideas on the backlog.
-
-Thanks!
-
 #### **Testing and Coverage**
 
 Every new feature and every bug should have tests as evidence. The coverage must stay 100%. If not, the PR will not be approved.
+
+You can also take a look at the [Trello board](https://trello.com/b/Gf6cmkvA/mongoose-fuzzy-searching) and add new ideas on the backlog.
+
+Thanks!
