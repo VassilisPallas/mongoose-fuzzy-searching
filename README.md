@@ -188,7 +188,7 @@ Middlewares is an optional `Object` that can contain custom `pre` middlewares. T
 - preUpdateMany
   - stands for schema.pre("updateMany", ...)
 
-If you want to add any other middleware othen than the above ones, you can add it directly on the schema.
+If you want to a middleware other than the above ones, you can add it directly on the schema.
 
 ```javascript
 const mongoose_fuzzy_searching = require('mongoose-fuzzy-searching');
@@ -281,7 +281,7 @@ const UserSchema = new Schema({
 UserSchema.plugin(mongoose_fuzzy_searching, { fields: ['firstName', 'lastName'] });
 ```
 
-In other words, thit plugin creates anagrams when you create or update a document. All the pre-existing documents won't contain these fuzzy arrays, so `fuzzySearch` function, will not be able to find them.
+In other words, this plugin creates anagrams when you create or update a document. All the pre-existing documents won't contain these fuzzy arrays, so `fuzzySearch` function, will not be able to find them.
 
 ### Update all pre-existing documents with ngrams
 
