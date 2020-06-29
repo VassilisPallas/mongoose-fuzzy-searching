@@ -188,7 +188,7 @@ Middlewares is an optional `Object` that can contain custom `pre` middlewares. T
 - preUpdateMany
   - stands for schema.pre("updateMany", ...)
 
-If you want to a middleware other than the above ones, you can add it directly on the schema.
+If you want to add a middleware other than the above ones, you can add it directly on the schema.
 
 ```javascript
 const mongoose_fuzzy_searching = require('mongoose-fuzzy-searching');
