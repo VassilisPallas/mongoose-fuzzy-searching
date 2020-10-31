@@ -30,7 +30,6 @@ commands:
       - run:
           name: Publish to npm
           command: |
-            source $BASH_ENV
             echo //registry.npmjs.org/:_authToken="<< parameters.token >>" > ~/.npmrc
             npm publish
 
