@@ -1,5 +1,5 @@
 # CI
-.travis.yml
+.circleci/
 
 # Linter
 .eslintignore

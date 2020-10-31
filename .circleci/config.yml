@@ -33,10 +33,12 @@ commands:
             echo //registry.npmjs.org/:_authToken="<< parameters.token >>" > ~/.npmrc
             npm publish
 
-only_on_master_branch: &only_on_master_branch
-  filters:
-    branches:
-      only: master
+verion_filter: &branch_filter
+filters:
+  tags:
+    only: /^v.*/
+  branches:
+    ignore: /.*/
 
 node_executor: &node_executor
   name: node/default
@@ -62,11 +64,12 @@ jobs:
           pkg-manager: npm
       - run:
           name: Run tests
-          command: npm run test
+          command: npm test
       - run:
           name: Upload coverage
           command: npx codecov
   publish:
+    description: Publish to npm
     executor: *node_executor
     steps:
       - checkout
@@ -75,18 +78,13 @@ jobs:
 
 workflows:
   version: 2.1
-  mongoose-fuzzy-searching:
+  mongoose-fuzzy-searching-pr:
     jobs:
       - lint
       - tests:
           requires:
             - lint
-      - approve_publish:
-          <<: *only_on_master_branch
-          type: approval
-          requires:
-            - tests
-      - publish:
-          <<: *only_on_master_branch
-          requires:
-            - approve_publish
+  mongoose-fuzzy-searching-publish:
+    <<: *verion_filter
+    jobs:
+      - publish
