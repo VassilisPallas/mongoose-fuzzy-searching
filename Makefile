@@ -16,6 +16,10 @@ update-version: ## Increase npm version using semantic versioning e.g. make upda
 	git tag
 	git push --follow-tags
 
+.PHONY: publish
+publish: ## Publish to npm
+	npm publish
+
 .PHONY: help
 help: ## parse jobs and descriptions from this Makefile
 	@grep -E '^[ a-zA-Z0-9_-]+:([^=]|$$)' $(MAKEFILE_LIST) \
