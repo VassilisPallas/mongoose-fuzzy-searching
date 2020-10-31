@@ -89,3 +89,6 @@ workflows:
             - tests
       - publish_package_to_npm:
           <<: *only_on_master_branch
+          name: Publish package to npm
+          requires:
+            - approve_publish
