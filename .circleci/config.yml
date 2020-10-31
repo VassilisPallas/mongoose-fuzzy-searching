@@ -72,9 +72,6 @@ jobs:
     executor: *node_executor
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - ''
       - git_config_user
       - publish_to_npm
 
