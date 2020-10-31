@@ -33,12 +33,12 @@ commands:
             echo //registry.npmjs.org/:_authToken="<< parameters.token >>" > ~/.npmrc
             npm publish
 
-verion_filter: &branch_filter
-filters:
-  tags:
-    only: /^v.*/
-  branches:
-    ignore: /.*/
+verion_filter: &verion_filter
+  filters:
+    tags:
+      only: /^v.*/
+    branches:
+      ignore: /.*/
 
 node_executor: &node_executor
   name: node/default
@@ -85,6 +85,7 @@ workflows:
           requires:
             - lint
   mongoose-fuzzy-searching-publish:
-    <<: *verion_filter
     jobs:
-      - publish
+      - publish:
+          <<: *verion_filter
+          name: Publish to npm
