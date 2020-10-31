@@ -86,6 +86,11 @@ workflows:
             - lint
   mongoose-fuzzy-searching-publish:
     jobs:
+      - approve_publish:
+          <<: *verion_filter
+          type: approval
       - publish:
           <<: *verion_filter
           name: Publish to npm
+          requires:
+            - approve_publish
