@@ -78,7 +78,7 @@ jobs:
 
 workflows:
   version: 2.1
-  mongoose-fuzzy-searching-pr:
+  mongoose-fuzzy-searching:
     jobs:
       - lint
       - tests:
