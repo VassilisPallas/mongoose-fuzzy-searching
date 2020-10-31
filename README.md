@@ -22,6 +22,12 @@ Install using [npm](https://npmjs.org)
 $ npm i mongoose-fuzzy-searching
 ```
 
+or using yarn
+
+```bash
+$ yarn add mongoose-fuzzy-searching
+```
+
 ## Usage
 
 ### Simple usage
