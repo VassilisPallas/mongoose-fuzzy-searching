@@ -1,0 +1,89 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@4.1.0
+  codecov: codecov/codecov@1.1.1
+
+commands:
+  git_config_user:
+    description: Configure git user
+    parameters:
+      user:
+        type: string
+        default: '${GIT_USERNAME}'
+      email:
+        type: string
+        default: '${GIT_EMAIL}'
+    steps:
+      - run:
+          name: Configure git user
+          command: |
+            git config --global user.email "<< parameters.email >>"
+            git config --global user.name "<< parameters.user >>"
+  publish_to_npm:
+    description: Publish to npm
+    parameters:
+      token:
+        type: string
+        default: '${NPM_TOKEN}'
+    steps:
+      - run:
+          name: Publish to npm
+          command: |
+            source $BASH_ENV
+            echo //registry.npmjs.org/:_authToken="<< parameters.token >>" > ~/.npmrc
+            npm publish
+
+only_on_master_branch: &only_on_master_branch
+  filters:
+    branches:
+      only: master
+
+node_executor: &node_executor
+  name: node/default
+  tag: '12.16'
+
+jobs:
+  lint:
+    description: Run lint
+    executor: *node_executor
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Run lint
+          command: npm run lint
+  tests:
+    description: Run tests
+    executor: *node_executor
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Run tests
+          command: npm run test
+      - run:
+          name: Upload coverage
+          command: npx codecov
+  publish_package_to_npm:
+    executor: *node_executor
+    steps:
+      - checkout
+      - git_config_user
+      - publish_to_npm
+
+workflows:
+  version: 2.1
+  mongoose-fuzzy-searching:
+    jobs:
+      - lint
+      - tests:
+          requires:
+            - lint
+      - publish_package_to_npm:
+          <<: *only_on_master_branch
+          type: approval
+          requires:
+            - tests

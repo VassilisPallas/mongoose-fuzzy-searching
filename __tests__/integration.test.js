@@ -15,7 +15,7 @@ afterAll(async () => {
 
 describe('fuzzySearch', () => {
   describe('mongoose_fuzzy_searching without the right options', () => {
-    const Model = db.createSchema({ name: String })(fuzzySearching, [
+    const Model = db.createSchema('without the right options', { name: String })(fuzzySearching, [
       {
         name: 'name',
         minSize: 2,
@@ -42,12 +42,15 @@ describe('fuzzySearch', () => {
   });
 
   describe('mongoose_fuzzy_searching without options and callback', () => {
-    const Model = db.createSchema({ name: String })(fuzzySearching, [
-      {
-        name: 'name',
-        minSize: 2,
-      },
-    ]);
+    const Model = db.createSchema('without options and callback', { name: String })(
+      fuzzySearching,
+      [
+        {
+          name: 'name',
+          minSize: 2,
+        },
+      ],
+    );
 
     beforeAll(async () => {
       await db.seed(Model, { name: 'Joe' });
@@ -93,7 +96,10 @@ describe('fuzzySearch', () => {
   });
 
   describe('mongoose_fuzzy_searching with options and without callback', () => {
-    const Model = db.createSchema({ name: String, lastName: String })(fuzzySearching, [
+    const Model = db.createSchema('with options and without callback', {
+      name: String,
+      lastName: String,
+    })(fuzzySearching, [
       {
         name: 'name',
         minSize: 2,
@@ -116,12 +122,15 @@ describe('fuzzySearch', () => {
   });
 
   describe('mongoose_fuzzy_searching with callback and without options', () => {
-    const Model = db.createSchema({ name: String })(fuzzySearching, [
-      {
-        name: 'name',
-        minSize: 2,
-      },
-    ]);
+    const Model = db.createSchema('with callback and without options', { name: String })(
+      fuzzySearching,
+      [
+        {
+          name: 'name',
+          minSize: 2,
+        },
+      ],
+    );
 
     beforeAll(async () => {
       await db.seed(Model, { name: 'Joe' });
@@ -139,12 +148,15 @@ describe('fuzzySearch', () => {
   });
 
   describe('mongoose_fuzzy_searching with options and callback', () => {
-    const Model = db.createSchema({ name: String, lastName: String })(fuzzySearching, [
-      {
-        name: 'name',
-        minSize: 2,
-      },
-    ]);
+    const Model = db.createSchema('with options and callback', { name: String, lastName: String })(
+      fuzzySearching,
+      [
+        {
+          name: 'name',
+          minSize: 2,
+        },
+      ],
+    );
 
     beforeAll(async () => {
       await db.seed(Model, { name: 'Joe', lastName: 'Doe' });
@@ -173,7 +185,7 @@ describe('fuzzySearch', () => {
 
   describe('mongoose_fuzzy_searching with `keys` attribute in fields', () => {
     describe('mongoose_fuzzy_searching with array of objects attribute', () => {
-      const Model = db.createSchema({
+      const Model = db.createSchema('keys with array of objects attribute', {
         texts: [
           {
             title: String,
@@ -213,14 +225,12 @@ describe('fuzzySearch', () => {
     });
 
     describe('mongoose_fuzzy_searching with single object attribute', () => {
-      const Model = db.createSchema({
-        title: [
-          {
-            en: String,
-            de: String,
-            it: String,
-          },
-        ],
+      const Model = db.createSchema('keys with single object attribute', {
+        title: {
+          en: String,
+          de: String,
+          it: String,
+        },
       })(fuzzySearching, [
         {
           name: 'title',
@@ -240,15 +250,20 @@ describe('fuzzySearch', () => {
       });
 
       it('fuzzySearch() -> should be able to find the title when the text is `stellari`', async () => {
-        const result = await Model.fuzzySearch('stellari');
-        expect(result).toHaveLength(1);
+        const ItalianResult = await Model.fuzzySearch('stellari');
+        const GermanResult = await Model.fuzzySearch('krieg');
+        const EnglishResult = await Model.fuzzySearch('war');
+
+        expect(ItalianResult).toHaveLength(1);
+        expect(GermanResult).toHaveLength(1);
+        expect(EnglishResult).toHaveLength(1);
       });
     });
   });
 
   describe('mongoose_fuzzy_searching with `exact` option', () => {
     describe('mongoose_fuzzy_searching with array of objects attribute', () => {
-      const Model = db.createSchema({
+      const Model = db.createSchema('exact with array of objects attribute', {
         name: String,
       })(fuzzySearching, ['name']);
 
@@ -266,7 +281,7 @@ describe('fuzzySearch', () => {
     });
 
     describe('mongoose_fuzzy_searching with single object attribute', () => {
-      const Model = db.createSchema({
+      const Model = db.createSchema('exact with single object attribute', {
         title: [
           {
             en: String,
@@ -301,6 +316,7 @@ describe('fuzzySearch', () => {
 
   describe('mongoose_fuzzy_searching should run user provided toObject & toJSON', () => {
     const Model = db.createSchema(
+      'toObject and toJSON',
       { name: String },
       {
         toObject: {
@@ -345,7 +361,7 @@ describe('fuzzySearch', () => {
   });
 
   describe('mongoose_fuzzy_searching with array of strings', () => {
-    const Model = db.createSchema({
+    const Model = db.createSchema('with array of strings', {
       tags: [String],
     })(fuzzySearching, ['tags']);
 
@@ -372,7 +388,10 @@ describe('fuzzySearch', () => {
 
   describe('mongoose_fuzzy_searching pre middlewares', () => {
     describe('mongoose_fuzzy_searching update user with `findOneAndUpdate`', () => {
-      const Model = db.createSchema({ name: String, age: Number })(fuzzySearching, [
+      const Model = db.createSchema('pre update user with findOneAndUpdate', {
+        name: String,
+        age: Number,
+      })(fuzzySearching, [
         {
           name: 'name',
           minSize: 2,
@@ -401,12 +420,15 @@ describe('fuzzySearch', () => {
     });
 
     describe('mongoose_fuzzy_searching update user with `update`', () => {
-      const Model = db.createSchema({ name: String })(fuzzySearching, [
-        {
-          name: 'name',
-          minSize: 2,
-        },
-      ]);
+      const Model = db.createSchema('pre update user with update', { name: String })(
+        fuzzySearching,
+        [
+          {
+            name: 'name',
+            minSize: 2,
+          },
+        ],
+      );
 
       beforeAll(async () => {
         const obj = await db.seed(Model, { name: 'Joe' });
@@ -430,12 +452,15 @@ describe('fuzzySearch', () => {
     });
 
     describe('mongoose_fuzzy_searching update user with `updateOne`', () => {
-      const Model = db.createSchema({ name: String })(fuzzySearching, [
-        {
-          name: 'name',
-          minSize: 2,
-        },
-      ]);
+      const Model = db.createSchema('pre update user with updateOne', { name: String })(
+        fuzzySearching,
+        [
+          {
+            name: 'name',
+            minSize: 2,
+          },
+        ],
+      );
 
       beforeAll(async () => {
         const obj = await db.seed(Model, { name: 'Joe' });
@@ -459,12 +484,15 @@ describe('fuzzySearch', () => {
     });
 
     describe('mongoose_fuzzy_searching insert users with `insertMany`', () => {
-      const Model = db.createSchema({ name: String })(fuzzySearching, [
-        {
-          name: 'name',
-          minSize: 2,
-        },
-      ]);
+      const Model = db.createSchema('pre insert user with insertMany', { name: String })(
+        fuzzySearching,
+        [
+          {
+            name: 'name',
+            minSize: 2,
+          },
+        ],
+      );
 
       beforeAll(async () => {
         await Model.insertMany([{ name: 'Vassilis' }, { name: 'Dimitris' }]);
@@ -482,12 +510,15 @@ describe('fuzzySearch', () => {
     });
 
     describe('mongoose_fuzzy_searching update users with `updateMany`', () => {
-      const Model = db.createSchema({ name: String })(fuzzySearching, [
-        {
-          name: 'name',
-          minSize: 2,
-        },
-      ]);
+      const Model = db.createSchema('pre update user with updateMany', { name: String })(
+        fuzzySearching,
+        [
+          {
+            name: 'name',
+            minSize: 2,
+          },
+        ],
+      );
 
       beforeAll(async () => {
         await Model.insertMany([{ name: 'Vassilis' }, { name: 'Dimitris' }]);
@@ -514,7 +545,7 @@ describe('fuzzySearch', () => {
         this.skill = 'amazing';
       });
 
-      const Model = db.createSchema(schema)(
+      const Model = db.createSchema('custom pre preSave', schema)(
         fuzzySearching,
         [
           {
@@ -538,7 +569,7 @@ describe('fuzzySearch', () => {
     it('should call `preUpdate`', async () => {
       const preUpdate = jest.fn().mockImplementation(function () {});
 
-      const Model = db.createSchema(schema)(
+      const Model = db.createSchema('custom pre preUpdate', schema)(
         fuzzySearching,
         [
           {
@@ -563,7 +594,7 @@ describe('fuzzySearch', () => {
     it('should call `preFindOneAndUpdate`', async () => {
       const preFindOneAndUpdate = jest.fn().mockImplementation(function () {});
 
-      const Model = db.createSchema(schema)(
+      const Model = db.createSchema('custom pre preFindOneAndUpdate', schema)(
         fuzzySearching,
         [
           {
@@ -592,7 +623,7 @@ describe('fuzzySearch', () => {
         });
       });
 
-      const Model = db.createSchema(schema)(
+      const Model = db.createSchema('custom pre preInsertMany', schema)(
         fuzzySearching,
         [
           {
@@ -619,7 +650,7 @@ describe('fuzzySearch', () => {
     it('should call `preUpdateMany`', async () => {
       const preUpdateMany = jest.fn().mockImplementation(function () {});
 
-      const Model = db.createSchema(schema)(
+      const Model = db.createSchema('custom pre preUpdateMany', schema)(
         fuzzySearching,
         [
           {
@@ -646,7 +677,7 @@ describe('fuzzySearch', () => {
     it('should call `preUpdateOne`', async () => {
       const preUpdateOne = jest.fn().mockImplementation(function () {});
 
-      const Model = db.createSchema(schema)(
+      const Model = db.createSchema('custom pre preUpdateOne', schema)(
         fuzzySearching,
         [
           {
@@ -668,11 +699,11 @@ describe('fuzzySearch', () => {
       expect(result[0]).toHaveProperty('skill', 'amazing');
     });
 
-    it('should call `preSave` nad `preUpdate`', async () => {
+    it('should call `preSave` and `preUpdate`', async () => {
       const preUpdate = jest.fn().mockImplementation(function () {});
       const preSave = jest.fn().mockImplementation(function () {});
 
-      const Model = db.createSchema(schema)(
+      const Model = db.createSchema('custom pre preSave and preUpdate', schema)(
         fuzzySearching,
         [
           {
@@ -710,7 +741,7 @@ describe('fuzzySearch', () => {
         });
       });
 
-      const Model = db.createSchema(schema)(
+      const Model = db.createSchema('custom pre preSave promise', schema)(
         fuzzySearching,
         [
           {
