@@ -57,7 +57,6 @@ jobs:
       - run:
           name: Upload coverage
           command: npx codecov
-
   lint:
     description: Run lint
     executor: *node_executor
