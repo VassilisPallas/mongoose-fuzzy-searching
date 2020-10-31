@@ -5,8 +5,6 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const mongod = new MongoMemoryServer();
 
-let dbNum = 0;
-
 const getURL = () => {
   return process.env.MONGO_DB
     ? 'mongodb://localhost:27017/fuzzy-test'
@@ -36,9 +34,11 @@ const closeConnection = async () => {
   await mongod.stop();
 };
 
-const createSchema = (schemaStructure, options = {}) => (plugin, fields, middlewares) => {
+const createSchema = (name, schemaStructure, options = {}) => (plugin, fields, middlewares) => {
+  const testName = name.replace(/ /g, '_').toLowerCase();
+
   const schema = new Schema(schemaStructure, {
-    collection: `fuzzy_searching_test_${++dbNum}`,
+    collection: `fuzzy_searching_test_${testName}`,
     ...options,
   });
   schema.plugin(plugin, {
@@ -46,7 +46,7 @@ const createSchema = (schemaStructure, options = {}) => (plugin, fields, middlew
     middlewares,
   });
 
-  return mongoose.model(`Model${dbNum}`, schema);
+  return mongoose.model(`Model${testName}`, schema);
 };
 
 const seed = (Model, obj) => {

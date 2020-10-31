@@ -1,5 +1,5 @@
 language: node_js
-node_js: [14, 13, 12, 11, 10]
+node_js: [14, 13, 12]
 install:
   - npm install -g codecov
   - npm install

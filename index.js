@@ -24,7 +24,7 @@ const parseArguments = (args, i1, i2) => {
     options = args[i1];
   }
 
-  if (!callback && typeof args[i2] === 'function') {
+  if (!callback && typeof isFunction(args[i2])) {
     callback = args[i2];
   }
 
@@ -61,13 +61,23 @@ const getMiddleware = (middlewares, name) => {
 
 const getDefaultValues = (item) => {
   const checkPrefixOnly = isObject(item) ? item.prefixOnly : DEFAULT_PREFIX_ONLY;
-
   const defaultNgamMinSize = isObject(item) ? item.minSize : DEFAULT_MIN_SIZE;
 
   return {
     checkPrefixOnly,
     defaultNgamMinSize,
   };
+};
+
+const getArgs = (queryArgs) => {
+  let queryString = queryArgs;
+  let exact = false;
+
+  if (isObject(queryArgs)) {
+    ({ query: queryString, exact } = queryArgs);
+  }
+
+  return { queryString, exact: !!exact };
 };
 
 /**
@@ -168,8 +178,7 @@ module.exports = function (schema, pluginOptions) {
       );
     }
 
-    const queryString = isObject(queryArgs[0]) ? queryArgs[0].query : queryArgs[0];
-    const exact = isObject(queryArgs[0]) ? !!queryArgs[0].exact : false;
+    const { exact, queryString } = getArgs(queryArgs[0]);
 
     if (!queryString) {
       return Model.find.apply(this);

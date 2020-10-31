@@ -18,8 +18,8 @@ This code is based on [this article](https://medium.com/xeneta/fuzzy-search-with
 
 Install using [npm](https://npmjs.org)
 
-```
-npm i mongoose-fuzzy-searching
+```bash
+$ npm i mongoose-fuzzy-searching
 ```
 
 ## Usage
@@ -117,8 +117,6 @@ The below table contains the expected keys for an object
 | prefixOnly              | **Boolean**       | false       | Only return ngrams from start of word. (It gives more precise results)                                                                                                                                                   |
 | escapeSpecialCharacters | **Boolean**       | true        | Remove special characters from N-grams.                                                                                                                                                                                  |
 | keys                    | **Array[String]** | null        | If the type of the collection attribute is `Object` or `[Object]` (see example), you can define which attributes will be used for fuzzy searching                                                                        |
-
-|
 
 Example:
 
@@ -226,8 +224,6 @@ The below table contains the expected keys for the first parameter (if is an obj
 | prefixOnly | **Boolean** | false       | Only return ngrams from start of word. (It gives more precise results) the prefix |
 | exact      | **Boolean** | false       | Matches on a phrase, as opposed to individual terms                               |
 
-|
-
 Example:
 
 ```javascript
@@ -330,6 +326,7 @@ _Note: this will run all suites **serially** to avoid mutliple concurrent connec
 This will run the tests using a memory database. If you wish for any reason to run the tests using an actual connection on a mongo instance, add the environment variable `MONGO_DB`:
 
 ```bash
+$ docker run --name mongo_fuzzy_test -p 27017:27017 mongo
 $ MONGO_DB=true npm test
 ```
 
