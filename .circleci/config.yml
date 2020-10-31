@@ -82,8 +82,10 @@ workflows:
       - tests:
           requires:
             - lint
-      - publish_package_to_npm:
+      - approve_publish:
           <<: *only_on_master_branch
           type: approval
           requires:
             - tests
+      - publish_package_to_npm:
+          <<: *only_on_master_branch
