@@ -39,12 +39,9 @@ In order to let the plugin create the indeces, you need to set `useCreateIndex` 
 ```javascript
 const options = {
   useNewUrlParser: true,
-  autoReconnect: true,
   useUnifiedTopology: true,
-  useFindAndModify: true,
+  useFindAndModify: false,
   useCreateIndex: true,
-  reconnectTries: Number.MAX_VALUE, // Set the value you'd like
-  reconnectInterval: 1000, // Set the value you'd like
 };
 
 mongoose.Promise = global.Promise;
