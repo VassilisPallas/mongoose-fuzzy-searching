@@ -401,7 +401,7 @@ describe('fuzzySearch', () => {
 
       beforeAll(async () => {
         const obj = await db.seed(Model, { name: 'Joe' });
-        await Model.findOneAndUpdate(obj._id, { age: 30 });
+        await Model.findOneAndUpdate({ _id: obj._id }, { age: 30 });
       });
 
       it('fuzzySearch() -> should return Promise', () => {
@@ -761,6 +761,27 @@ describe('fuzzySearch', () => {
       expect(result).toHaveLength(1);
       expect(preSave).toHaveBeenCalledTimes(1);
       expect(result[0]).toHaveProperty('skill', 'amazing');
+    });
+  });
+
+  describe('mongoose_fuzzy_searching with query helper', () => {
+    const Model = db.createSchema('with query helper', { name: String, age: Number })(
+      fuzzySearching,
+      [
+        {
+          name: 'name',
+          minSize: 2,
+        },
+      ],
+    );
+
+    beforeAll(async () => {
+      await db.seed(Model, { name: 'Joe', age: 30 });
+    });
+
+    it('fuzzySearch() -> should return the results by chaing queries', async () => {
+      const result = await Model.find({ age: { $gte: 30 } }).fuzzySearch('jo');
+      expect(result).toHaveLength(1);
     });
   });
 });
