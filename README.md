@@ -91,7 +91,6 @@ try {
   //   "lastName": "Doe",
   //   "email": "joe.doe@mail.com",
   //   "age": 30,
-  //   "confidenceScore": 34.3 ($text meta score)
   // }
 } catch (e) {
   console.error(e);
