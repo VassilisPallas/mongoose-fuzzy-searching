@@ -80,6 +80,19 @@ try {
   //   "age": 30,
   //   "confidenceScore": 34.3 ($text meta score)
   // }
+
+  // Also fuzzySearch can be used in a chain
+  const usersOver30 = await User.find({ age: { $gte: 30 } }).fuzzySearch('jo');
+  console.log(usersOver30);
+  // each user object will not contain the fuzzy keys:
+  // Eg.
+  // {
+  //   "firstName": "Joe",
+  //   "lastName": "Doe",
+  //   "email": "joe.doe@mail.com",
+  //   "age": 30,
+  //   "confidenceScore": 34.3 ($text meta score)
+  // }
 } catch (e) {
   console.error(e);
 }
