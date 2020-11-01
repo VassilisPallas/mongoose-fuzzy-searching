@@ -22,11 +22,16 @@ endif
 
 .PHONY: publish
 publish: ## Publish to npm
-ifneq ($(shell git rev-parse --abbrev-ref HEAD),master)
-	@echo ">> Branch is not master";
-	exit 1;
-endif
+	@[ "$(NPM_TOKEN)" ] || (echo ">> npm token is not set"; exit 1)
+	echo //registry.npmjs.org/:_authToken="$(NPM_TOKEN)" > ~/.npmrc
 	npm publish
+
+.PHONY: configure-git-user
+configure-git-user: ## Configure git user
+	@[ "$(GIT_EMAIL)" ] || (echo ">> email is not set"; exit 1)
+	@[ "$(GIT_USERNAME)" ] || (echo ">> name is not set"; exit 1)
+	git config --global user.email "$(GIT_EMAIL)"
+	git config --global user.name "$(GIT_USERNAME)"
 
 .PHONY: help
 help: ## parse jobs and descriptions from this Makefile
