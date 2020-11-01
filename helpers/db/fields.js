@@ -50,9 +50,8 @@ class Generate {
   }
 
   fromString(item) {
-    if (this.attributes[item]) {
-      let value = this.attributes[item];
-
+    let value = this.attributes[item];
+    if (value) {
       if (Array.isArray(value)) {
         value = value.join(' ');
       }
@@ -62,10 +61,16 @@ class Generate {
   }
 
   fromObject(item) {
-    if (this.attributes[`${item.name}`]) {
+    let value = this.attributes[`${item.name}`];
+    if (value) {
       const escapeSpecialCharacters = item.escapeSpecialCharacters !== false;
+
+      if (Array.isArray(value)) {
+        value = value.join(' ');
+      }
+
       this.attributes[`${item.name}_fuzzy`] = this.makeNGrams(
-        this.attributes[item.name],
+        value,
         escapeSpecialCharacters,
         item.minSize,
         item.prefixOnly,
