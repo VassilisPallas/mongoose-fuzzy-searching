@@ -41,3 +41,5 @@ workflows:
       - tests:
           requires:
             - lint
+      - consent:
+          type: approval
