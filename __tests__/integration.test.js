@@ -1,7 +1,3 @@
-/**
- * @group integration
- */
-
 const fuzzySearching = require('..');
 const db = require('./support/db');
 

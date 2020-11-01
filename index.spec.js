@@ -1,7 +1,3 @@
-/**
- * @group unit
- */
-
 const plugin = require('.');
 const { validMiddlewares } = require('./helpers/config');
 
