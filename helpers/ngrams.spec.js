@@ -1,7 +1,3 @@
-/**
- * @group unit
- */
-
 const { nGrams, makeNGrams } = require('./ngrams');
 
 const constant = { DEFAULT_MIN_SIZE: 2, DEFAULT_PREFIX_ONLY: false };

@@ -1,7 +1,3 @@
-/**
- * @group integration
- */
-
 const fuzzySearching = require('..');
 const db = require('./support/db');
 
@@ -236,6 +232,7 @@ describe('fuzzySearch', () => {
           name: 'title',
           escapeSpecialCharacters: false,
           keys: ['en', 'de', 'it'],
+          minSize: 3,
         },
       ]);
 
@@ -250,8 +247,8 @@ describe('fuzzySearch', () => {
       });
 
       it('fuzzySearch() -> should be able to find the title when the text is `stellari`', async () => {
-        const ItalianResult = await Model.fuzzySearch('stellari');
-        const GermanResult = await Model.fuzzySearch('krieg');
+        const ItalianResult = await Model.fuzzySearch('ste');
+        const GermanResult = await Model.fuzzySearch('kri');
         const EnglishResult = await Model.fuzzySearch('war');
 
         expect(ItalianResult).toHaveLength(1);
@@ -400,7 +397,7 @@ describe('fuzzySearch', () => {
 
       beforeAll(async () => {
         const obj = await db.seed(Model, { name: 'Joe' });
-        await Model.findOneAndUpdate(obj._id, { age: 30 });
+        await Model.findOneAndUpdate({ _id: obj._id }, { age: 30 });
       });
 
       it('fuzzySearch() -> should return Promise', () => {
@@ -760,6 +757,27 @@ describe('fuzzySearch', () => {
       expect(result).toHaveLength(1);
       expect(preSave).toHaveBeenCalledTimes(1);
       expect(result[0]).toHaveProperty('skill', 'amazing');
+    });
+  });
+
+  describe('mongoose_fuzzy_searching with query helper', () => {
+    const Model = db.createSchema('with query helper', { name: String, age: Number })(
+      fuzzySearching,
+      [
+        {
+          name: 'name',
+          minSize: 2,
+        },
+      ],
+    );
+
+    beforeAll(async () => {
+      await db.seed(Model, { name: 'Joe', age: 30 });
+    });
+
+    it('fuzzySearch() -> should return the results by chaing queries', async () => {
+      const result = await Model.find({ age: { $gte: 30 } }).fuzzySearch('jo');
+      expect(result).toHaveLength(1);
     });
   });
 });

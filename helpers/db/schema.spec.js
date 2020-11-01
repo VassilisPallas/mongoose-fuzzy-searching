@@ -1,7 +1,3 @@
-/**
- * @group unit
- */
-
 const { addArrayToSchema, addToSchema, createSchemaObject, setTransformers } = require('./schema');
 
 describe('createSchemaObject', () => {

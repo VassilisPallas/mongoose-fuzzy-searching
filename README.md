@@ -32,6 +32,22 @@ $ yarn add mongoose-fuzzy-searching
 
 ### Simple usage
 
+Before starting, for best practices and avoid any issues, handle correctly all the [Deprecation Warnings](https://mongoosejs.com/docs/deprecations.html).
+
+In order to let the plugin create the indeces, you need to set `useCreateIndex` to true. The below example demonstrates how to connect with the database.
+
+```javascript
+const options = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  useCreateIndex: true,
+};
+
+mongoose.Promise = global.Promise;
+return mongoose.connect(URL, options);
+```
+
 In the below example, we have a `User` collection and we want to make fuzzy searching in `firstName` and `lastName`.
 
 ```javascript
@@ -63,6 +79,18 @@ try {
   //   "email": "joe.doe@mail.com",
   //   "age": 30,
   //   "confidenceScore": 34.3 ($text meta score)
+  // }
+
+  // Also fuzzySearch can be used in a chain
+  const usersOver30 = await User.find({ age: { $gte: 30 } }).fuzzySearch('jo');
+  console.log(usersOver30);
+  // each user object will not contain the fuzzy keys:
+  // Eg.
+  // {
+  //   "firstName": "Joe",
+  //   "lastName": "Doe",
+  //   "email": "joe.doe@mail.com",
+  //   "age": 30,
   // }
 } catch (e) {
   console.error(e);
@@ -332,7 +360,7 @@ _Note: this will run all suites **serially** to avoid mutliple concurrent connec
 This will run the tests using a memory database. If you wish for any reason to run the tests using an actual connection on a mongo instance, add the environment variable `MONGO_DB`:
 
 ```bash
-$ docker run --name mongo_fuzzy_test -p 27017:27017 mongo
+$ docker run --name mongo_fuzzy_test -p 27017:27017 -d mongo
 $ MONGO_DB=true npm test
 ```
 

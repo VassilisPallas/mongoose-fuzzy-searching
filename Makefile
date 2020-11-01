@@ -11,6 +11,10 @@ validate-circle-ci-local: ## Validates the Circle CI config at .circleci/config.
 
 .PHONY: update-version
 update-version: ## Increase npm version using semantic versioning e.g. make update-version VERSIONING=major|minor|patch
+ifneq ($(shell git rev-parse --abbrev-ref HEAD),master)
+	@echo ">> Branch is not master";
+	exit 1;
+endif
 	@[ "$(VERSIONING)" ] || (echo ">> Semantic versioning is not set"; exit 1)
 	npm version $(VERSIONING)
 	git tag
@@ -18,7 +22,16 @@ update-version: ## Increase npm version using semantic versioning e.g. make upda
 
 .PHONY: publish
 publish: ## Publish to npm
+	@[ "$(NPM_TOKEN)" ] || (echo ">> npm token is not set"; exit 1)
+	echo //registry.npmjs.org/:_authToken="$(NPM_TOKEN)" > ~/.npmrc
 	npm publish
+
+.PHONY: configure-git-user
+configure-git-user: ## Configure git user
+	@[ "$(GIT_EMAIL)" ] || (echo ">> email is not set"; exit 1)
+	@[ "$(GIT_USERNAME)" ] || (echo ">> name is not set"; exit 1)
+	git config --global user.email "$(GIT_EMAIL)"
+	git config --global user.name "$(GIT_USERNAME)"
 
 .PHONY: help
 help: ## parse jobs and descriptions from this Makefile

@@ -1,7 +1,3 @@
-/**
- * @group unit
- */
-
 const { createByFieldType, createFields, createNGrams, removeFuzzyElements } = require('./fields');
 
 describe('createByFieldType', () => {
@@ -99,13 +95,19 @@ describe('removeFuzzyElements', () => {
   let fields;
 
   it('should remove the fields', () => {
-    fields = ['test', { name: 'some_name', weight: 10 }];
+    fields = [
+      'test',
+      { name: 'some_name', weight: 10 },
+      { name: 'text', keys: ['en', 'es'], weight: 3 },
+    ];
 
     createField = (obj) => (item, index) => {
       if (index === 0) {
         obj.fromString(item);
       } else if (index === 1) {
         obj.fromObject(item);
+      } else if (index === 2) {
+        obj.fromObjectKeys(item);
       }
     };
 
@@ -136,17 +138,21 @@ describe('createNGrams', () => {
         key_test_1: '1234',
         key_test_2: '1234',
       },
+      some__array__name: ['some_name', 'some_name2'],
+      some__array__name2: ['some_name', 'some_name2'],
     };
     fields = [
       'test',
+      'some__array__name',
       { keys: ['key_test_1', 'key_test_2'], name: 'some__key_name' },
       { name: 'some_name', weight: 10 },
+      { name: 'some__array__name2' },
     ];
 
     createField = (obj) => (item, index) => {
-      if (index === 0) {
+      if (index <= 1) {
         obj.fromString(item);
-      } else if (index === 1) {
+      } else if (index === 2) {
         obj.fromObjectKeys(item);
       } else {
         obj.fromObject(item);
@@ -157,18 +163,14 @@ describe('createNGrams', () => {
     expect(attributes).toStrictEqual({
       test: 'test',
       some_name: 'some_name',
-      some__key_name: {
-        key_test_1: '1234',
-        key_test_2: '1234',
-      },
+      some__key_name: { key_test_1: '1234', key_test_2: '1234' },
+      some__array__name: ['some_name', 'some_name2'],
+      some__array__name2: ['some_name', 'some_name2'],
       test_fuzzy: 'test',
+      some__array__name_fuzzy: 'some_name some_name2',
+      some__key_name_fuzzy: [{ key_test_1_fuzzy: '1234', key_test_2_fuzzy: '1234' }],
       some_name_fuzzy: 'some_name',
-      some__key_name_fuzzy: [
-        {
-          key_test_1_fuzzy: '1234',
-          key_test_2_fuzzy: '1234',
-        },
-      ],
+      some__array__name2_fuzzy: 'some_name some_name2',
     });
   });
 

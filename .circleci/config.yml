@@ -8,6 +8,38 @@ node_executor: &node_executor
   name: node/default
   tag: '12.16'
 
+verion_filter: &verion_filter
+  filters:
+    tags:
+      only: /^v.*/
+    branches:
+      ignore: /.*/
+
+commands:
+  git_config_user:
+    description: Configure git user
+    parameters:
+      user:
+        type: string
+        default: '${GIT_USERNAME}'
+      email:
+        type: string
+        default: '${GIT_EMAIL}'
+    steps:
+      - run:
+          name: Configure git user
+          command: make configure-git-user GIT_EMAIL=<< parameters.email >> GIT_USERNAME=<< parameters.user >>
+  publish_to_npm:
+    description: Publish to npm
+    parameters:
+      token:
+        type: string
+        default: '${NPM_TOKEN}'
+    steps:
+      - run:
+          name: Publish to npm
+          command: make publish NPM_TOKEN=<< parameters.token >>
+
 jobs:
   lint:
     description: Run lint
@@ -32,6 +64,13 @@ jobs:
       - run:
           name: Upload coverage
           command: npx codecov
+  publish:
+    description: Publish to npm
+    executor: *node_executor
+    steps:
+      - checkout
+      - git_config_user
+      - publish_to_npm
 
 workflows:
   version: 2.1
@@ -41,3 +80,13 @@ workflows:
       - tests:
           requires:
             - lint
+  mongoose-fuzzy-searching-publish:
+    jobs:
+      - approve_publish:
+          <<: *verion_filter
+          type: approval
+      - publish:
+          <<: *verion_filter
+          name: Publish to npm
+          requires:
+            - approve_publish

@@ -16,15 +16,12 @@ const openConnection = async () => {
 
   const mongooseOpts = {
     useNewUrlParser: true,
-    autoReconnect: true,
-    reconnectTries: Number.MAX_VALUE,
-    reconnectInterval: 1000,
     useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true,
   };
 
   mongoose.Promise = global.Promise;
-  mongoose.set('useFindAndModify', false);
-  mongoose.set('useCreateIndex', true);
   return mongoose.connect(uri, mongooseOpts);
 };
 
