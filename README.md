@@ -32,6 +32,25 @@ $ yarn add mongoose-fuzzy-searching
 
 ### Simple usage
 
+Before starting, for best practices and avoid any issues, handle correctly all the [Deprecation Warnings](https://mongoosejs.com/docs/deprecations.html).
+
+In order to let the plugin create the indeces, you need to set `useCreateIndex` to true. The below example demonstrates how to connect with the database.
+
+```javascript
+const options = {
+  useNewUrlParser: true,
+  autoReconnect: true,
+  useUnifiedTopology: true,
+  useFindAndModify: true,
+  useCreateIndex: true,
+  reconnectTries: Number.MAX_VALUE, // Set the value you'd like
+  reconnectInterval: 1000, // Set the value you'd like
+};
+
+mongoose.Promise = global.Promise;
+return mongoose.connect(URL, options);
+```
+
 In the below example, we have a `User` collection and we want to make fuzzy searching in `firstName` and `lastName`.
 
 ```javascript
