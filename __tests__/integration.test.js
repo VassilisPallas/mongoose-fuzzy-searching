@@ -236,6 +236,7 @@ describe('fuzzySearch', () => {
           name: 'title',
           escapeSpecialCharacters: false,
           keys: ['en', 'de', 'it'],
+          minSize: 3,
         },
       ]);
 
@@ -250,8 +251,8 @@ describe('fuzzySearch', () => {
       });
 
       it('fuzzySearch() -> should be able to find the title when the text is `stellari`', async () => {
-        const ItalianResult = await Model.fuzzySearch('stellari');
-        const GermanResult = await Model.fuzzySearch('krieg');
+        const ItalianResult = await Model.fuzzySearch('ste');
+        const GermanResult = await Model.fuzzySearch('kri');
         const EnglishResult = await Model.fuzzySearch('war');
 
         expect(ItalianResult).toHaveLength(1);
