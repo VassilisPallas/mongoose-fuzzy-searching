@@ -11,6 +11,10 @@ validate-circle-ci-local: ## Validates the Circle CI config at .circleci/config.
 
 .PHONY: update-version
 update-version: ## Increase npm version using semantic versioning e.g. make update-version VERSIONING=major|minor|patch
+ifneq ($(shell git rev-parse --abbrev-ref HEAD),master)
+	@echo ">> Branch is not master";
+	exit 1;
+endif
 	@[ "$(VERSIONING)" ] || (echo ">> Semantic versioning is not set"; exit 1)
 	npm version $(VERSIONING)
 	git tag
@@ -18,6 +22,10 @@ update-version: ## Increase npm version using semantic versioning e.g. make upda
 
 .PHONY: publish
 publish: ## Publish to npm
+ifneq ($(shell git rev-parse --abbrev-ref HEAD),master)
+	@echo ">> Branch is not master";
+	exit 1;
+endif
 	npm publish
 
 .PHONY: help

@@ -99,13 +99,19 @@ describe('removeFuzzyElements', () => {
   let fields;
 
   it('should remove the fields', () => {
-    fields = ['test', { name: 'some_name', weight: 10 }];
+    fields = [
+      'test',
+      { name: 'some_name', weight: 10 },
+      { name: 'text', keys: ['en', 'es'], weight: 3 },
+    ];
 
     createField = (obj) => (item, index) => {
       if (index === 0) {
         obj.fromString(item);
       } else if (index === 1) {
         obj.fromObject(item);
+      } else if (index === 2) {
+        obj.fromObjectKeys(item);
       }
     };
 

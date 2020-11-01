@@ -332,7 +332,7 @@ _Note: this will run all suites **serially** to avoid mutliple concurrent connec
 This will run the tests using a memory database. If you wish for any reason to run the tests using an actual connection on a mongo instance, add the environment variable `MONGO_DB`:
 
 ```bash
-$ docker run --name mongo_fuzzy_test -p 27017:27017 mongo
+$ docker run --name mongo_fuzzy_test -p 27017:27017 -d mongo
 $ MONGO_DB=true npm test
 ```
 
