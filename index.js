@@ -1,7 +1,3 @@
-const mongoose = require('mongoose');
-
-const { Model } = mongoose;
-
 const {
   config: { DEFAULT_MIN_SIZE, DEFAULT_PREFIX_ONLY, validMiddlewares },
   createFields,
@@ -179,9 +175,8 @@ module.exports = function (schema, pluginOptions) {
     }
 
     const { exact, queryString } = getArgs(queryArgs[0]);
-
     if (!queryString) {
-      return Model.find.apply(this);
+      return this.find();
     }
 
     const { checkPrefixOnly, defaultNgamMinSize } = getDefaultValues(queryArgs[0]);
@@ -206,7 +201,7 @@ module.exports = function (schema, pluginOptions) {
       };
     }
 
-    return Model.find.apply(this, [
+    return this.find.apply(this, [
       search,
       { confidenceScore: { $meta: 'textScore' } },
       { sort: { confidenceScore: { $meta: 'textScore' } } },
