@@ -16,6 +16,7 @@ ifneq ($(shell git rev-parse --abbrev-ref HEAD),master)
 	exit 1;
 endif
 	@[ "$(VERSIONING)" ] || (echo ">> Semantic versioning is not set"; exit 1)
+	git pull origin master
 	npm version $(VERSIONING)
 	git tag
 	git push --follow-tags
