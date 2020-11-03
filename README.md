@@ -266,11 +266,11 @@ UserSchema.plugin(mongoose_fuzzy_searching, {
 });
 ```
 
-### Query parameters
+## Query parameters
 
 The fuzzy search query can be used either as `static` function, or as a `helper`, which let's you to chain multiple queries together. The function name in either case is surprise, surprise, `fuzzySearch`.
 
-#### Instance method
+### Instance method
 
 Instance method can accept up to three parameters. The first one is the query, which can either be either a `String` or an `Object`. This parameter is **required**.
 The second parameter can either be eiter an `Object` that contains any additional queries (e.g. `age: { $gt: 18 }`), or a callback function.
@@ -320,7 +320,7 @@ User.fuzzySearch('jo', { age: { $gt: 18 } }, (err, doc) => {
 });
 ```
 
-#### Query helper
+### Query helper
 
 You can also use the query is a helper function, which is like instance methods but for mongoose queries. Query helper methods let you extend mongoose's chainable query builder API.
 
