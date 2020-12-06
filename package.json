@@ -1,13 +1,18 @@
 {
   "name": "mongoose-fuzzy-searching",
   "version": "2.0.2",
-  "author": "Vassilis Pallas <vspallas@gmail.com>",
+  "author": "Vasileios Pallas <vspallas@gmail.com>",
   "description": "Mongoose fuzzy searching plugin",
-  "main": "index.js",
+  "files": [
+    "lib/**/*"
+  ],
+  "main": "lib/index.js",
+  "types": "typings/index.d.ts",
   "scripts": {
     "lint:fix": "eslint --fix .",
-    "format": "prettier --write \"./**/*.{json,js}\"",
-    "lint": "eslint --ext .js \"./**/*.{json,js}\"",
+    "format": "prettier --write \"./**/*.{json,js,ts}\"",
+    "lint": "eslint --ext .js \"./**/*.{json,js,ts}\"",
+    "build": "tsc",
     "test:integration": "jest --colors --runInBand __tests__/**.test.js",
     "test:unit": "jest --colors spec.js",
     "test": "jest --colors --runInBand",
@@ -44,6 +49,10 @@
     "mongoose": "5.10.x"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.15",
+    "@types/mongoose": "^5.7.37",
+    "@typescript-eslint/eslint-plugin": "^4.9.0",
+    "@typescript-eslint/parser": "^4.9.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-config-prettier": "^6.11.0",
@@ -55,6 +64,9 @@
     "lint-staged": "^10.2.2",
     "mongodb-memory-server": "^6.6.0",
     "mongoose": "^5.10.11",
-    "prettier": "^2.0.5"
-  }
+    "prettier": "^2.0.5",
+    "ts-jest": "^26.4.3",
+    "typescript": "^4.0.5"
+  },
+  "dependencies": {}
 }

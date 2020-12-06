@@ -8,6 +8,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Typescript
+/lib
+/old
+
 # Runtime data
 pids
 *.pid

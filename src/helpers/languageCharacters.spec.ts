@@ -1,20 +1,16 @@
-const languageCharacters = require('./languageCharacters');
+import languageCharacters from './languageCharacters';
 
 describe('languageCharacters', () => {
-  it('should return empty string when the attribute is undefined', () => {
-    expect(languageCharacters()).toEqual('');
-  });
-
   it('should return empty string when the attribute is empty string', () => {
     expect(languageCharacters('')).toEqual('');
   });
 
-  it('should return `asteris` when the given string is `αστέρης`', () => {
-    expect(languageCharacters('αστέρης')).toEqual('asteris');
+  it('should return `aggelos` when the given string is `άγγελος`', () => {
+    expect(languageCharacters('άγγελος')).toEqual('angelos');
   });
 
-  it('should return `asteris` when the given string is `Αστέρης`', () => {
-    expect(languageCharacters('Αστέρης')).toEqual('asteris');
+  it('should return `Aggelos` when the given string is `Άγγελος`', () => {
+    expect(languageCharacters('Άγγελος')).toEqual('angelos');
   });
 
   it('should return `evcharisto` when the given string is `ευχαριστώ`', () => {

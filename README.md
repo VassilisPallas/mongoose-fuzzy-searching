@@ -3,7 +3,7 @@
 mongoose-fuzzy-searching is simple and lightweight plugin that enables fuzzy searching in documents in MongoDB.
 This code is based on [this article](https://medium.com/xeneta/fuzzy-search-with-mongodb-and-python-57103928ee5d).
 
-[![Build Status](https://travis-ci.com/VassilisPallas/mongoose-fuzzy-searching.svg?token=iwmbqGL1Zp9rkA7hmQ6P&branch=master)](https://travis-ci.com/VassilisPallas/mongoose-fuzzy-searching)
+[![CircleCI](https://circleci.com/gh/VassilisPallas/mongoose-fuzzy-searching.svg?style=shield)](LINK)
 [![codecov](https://codecov.io/gh/VassilisPallas/mongoose-fuzzy-searching/branch/master/graph/badge.svg)](https://codecov.io/gh/VassilisPallas/mongoose-fuzzy-searching)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FVassilisPallas%2Fmongoose-fuzzy-searching.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FVassilisPallas%2Fmongoose-fuzzy-searching?ref=badge_shield)
@@ -16,7 +16,6 @@ This code is based on [this article](https://medium.com/xeneta/fuzzy-search-with
     - [Fields](#fields)
       - [String field](#string-field)
       - [Object field](#object-field)
-    - [Middlewares](#middlewares)
 - [Query parameters](#query-parameters)
   - [Instance method](#instance-method)
   - [Query helper](#query-helper)
@@ -68,7 +67,7 @@ mongoose.Promise = global.Promise;
 return mongoose.connect(URL, options);
 ```
 
-In the below example, we have a `User` collection and we want to make fuzzy searching in `firstName` and `lastName`.
+In the below example, we create a `User` model that sets the `firstName` and `lastName` attributes to the plugin.
 
 ```javascript
 const { Schema } = require('mongoose');
@@ -156,7 +155,7 @@ The below table contains the expected keys for this object.
 | weight                  | **Integer**       | 1           | Denotes the significance of the field relative to the other indexed fields in terms of the text search score. [Learn more about index weights](https://docs.mongodb.com/manual/tutorial/control-results-of-text-search/) |
 | prefixOnly              | **Boolean**       | false       | Only return ngrams from start of word. (It gives more precise results)                                                                                                                                                   |
 | escapeSpecialCharacters | **Boolean**       | true        | Remove special characters from N-grams.                                                                                                                                                                                  |
-| keys                    | **Array[String]** | null        | If the type of the collection attribute is `Object` or `[Object]` (see example), you can define which attributes will be used for fuzzy searching                                                                        |
+| keys                    | **Array[String]** | null        | If the type of the collection attribute is `Object` or `Object[]` (see example), you can define which nested attributes will be used for fuzzy searching                                                                 |
 
 Example:
 
@@ -214,17 +213,17 @@ UserSchema.plugin(mongoose_fuzzy_searching, {
 Middlewares is an optional `Object` that can contain custom `pre` middlewares. This plugin is using these middlewares in order to create or update the fuzzy elements. That means that if you add `pre` middlewares, they will never get called since the plugin overrides them. To avoid that problem you can pass your custom midlewares into the plugin. Your middlewares will be called **first**. The middlewares you can pass are:
 
 - preSave
-  - stands for `schema.pre("save", ...)`
+  - stands for `schema.pre("save", function(next) {...})`
 - preInsertMany
-  - stands for `schema.pre("insertMany", ...)`
+  - stands for `schema.pre("insertMany", function(next, docs) {...})`
 - preUpdate
-  - stands for `schema.pre("update", ...)`
+  - stands for `schema.pre("update", function(next) {...})`
 - preUpdateOne
-  - stands for `schema.pre("updateOne", ...)`
+  - stands for `schema.pre("updateOne", function(next) {...})`
 - preFindOneAndUpdate
-  - stands for `schema.pre("findOneAndUpdate", ...)`
+  - stands for `schema.pre("findOneAndUpdate", function(next) {...})`
 - preUpdateMany
-  - stands for `schema.pre("updateMany", ...)`
+  - stands for `schema.pre("updateMany", function(next) {...})`
 
 If you want to add any of the middlewares above, you can add it directly on the plugin.
 

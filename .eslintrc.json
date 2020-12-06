@@ -5,15 +5,29 @@
     "es6": true,
     "jest": true
   },
-  "extends": ["airbnb-base", "plugin:jest/recommended", "plugin:prettier/recommended"],
+  "extends": [
+    "airbnb-base",
+    "plugin:jest/recommended",
+    "plugin:prettier/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".ts"]
+      }
+    }
+  },
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
   },
-  "plugins": ["prettier", "jest"],
   "parserOptions": {
-    "ecmaVersion": 11
+    "ecmaVersion": 2020,
+    "sourceType": "module"
   },
+  "plugins": ["prettier", "jest", "@typescript-eslint"],
+  "parser": "@typescript-eslint/parser",
   "rules": {
     "prettier/prettier": "error",
     "jest/no-disabled-tests": "warn",
@@ -24,7 +38,20 @@
     "no-underscore-dangle": "off",
     "no-plusplus": "off",
     "no-param-reassign": "off",
+    "no-unused-expressions": "off",
     "func-names": "off",
-    "max-classes-per-file": "off"
+    "max-classes-per-file": "off",
+    "import/prefer-default-export": "off",
+    "class-methods-use-this": "off",
+    "prefer-spread": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "ts": "never"
+      }
+    ]
   }
 }

@@ -1,55 +1,39 @@
-const fuzzySearching = require('..');
-const db = require('./support/db');
+import { openConnection, closeConnection, createTestModel } from './support/db';
+import { confidenceScore, sort as pluginSort } from '../src';
+
+import { Fields } from '../src/types';
 
 beforeAll(async () => {
-  await db.openConnection();
+  await openConnection();
 });
 
 afterAll(async () => {
-  await db.closeConnection();
+  await closeConnection();
 });
 
 describe('fuzzySearch', () => {
-  describe('mongoose_fuzzy_searching without the right options', () => {
-    const Model = db.createSchema('without the right options', { name: String })(fuzzySearching, [
+  describe('mongoose_fuzzy_searching without options and callback', () => {
+    const schemaStructure = { name: String };
+
+    interface TestSchema {
+      name?: string;
+    }
+
+    const pluginFields: Fields = [
       {
         name: 'name',
         minSize: 2,
       },
-    ]);
+    ];
+
+    const TestModel = createTestModel<TestSchema>('without options and callback', {
+      schemaStructure,
+      pluginFields,
+    });
+    const Model = TestModel.model;
 
     beforeAll(async () => {
-      await db.seed(Model, { name: 'Joe' });
-    });
-
-    describe('Error handling', () => {
-      it('fuzzySearch() -> should return an TypeError when the first argument is undefined', () => {
-        expect(Model.fuzzySearch.bind(this)).toThrow(
-          'Fuzzy Search: First argument is mandatory and must be a string or an object.',
-        );
-      });
-
-      it('fuzzySearch() -> should return an TypeError when the first argument is a function', () => {
-        expect(Model.fuzzySearch.bind(this, () => {})).toThrow(
-          'Fuzzy Search: First argument is mandatory and must be a string or an object.',
-        );
-      });
-    });
-  });
-
-  describe('mongoose_fuzzy_searching without options and callback', () => {
-    const Model = db.createSchema('without options and callback', { name: String })(
-      fuzzySearching,
-      [
-        {
-          name: 'name',
-          minSize: 2,
-        },
-      ],
-    );
-
-    beforeAll(async () => {
-      await db.seed(Model, { name: 'Joe' });
+      await TestModel.seed({ name: 'Joe' });
     });
 
     it('fuzzySearch() -> should return Promise', () => {
@@ -92,22 +76,32 @@ describe('fuzzySearch', () => {
   });
 
   describe('mongoose_fuzzy_searching with options and without callback', () => {
-    const Model = db.createSchema('with options and without callback', {
-      name: String,
-      lastName: String,
-    })(fuzzySearching, [
+    const schemaStructure = { name: String, lastName: String };
+
+    interface TestSchema {
+      name?: string;
+      lastName?: string;
+    }
+
+    const pluginFields: Fields = [
       {
         name: 'name',
         minSize: 2,
       },
-    ]);
+    ];
+
+    const TestModel = createTestModel<TestSchema>('with options and without callback', {
+      schemaStructure,
+      pluginFields,
+    });
+    const Model = TestModel.model;
 
     beforeAll(async () => {
-      await db.seed(Model, { name: 'Joe', lastName: 'Doe' });
+      await TestModel.seed({ name: 'Joe', lastName: 'Doe' });
     });
 
     it('fuzzySearch() -> should not be able to find users when the options searches for `lastName` with value `test`', async () => {
-      const result = await Model.fuzzySearch('jo', { lastName: 'test' });
+      const result = await Model.fuzzySearch('jo', { name: 'd' });
       expect(result).toHaveLength(0);
     });
 
@@ -118,18 +112,27 @@ describe('fuzzySearch', () => {
   });
 
   describe('mongoose_fuzzy_searching with callback and without options', () => {
-    const Model = db.createSchema('with callback and without options', { name: String })(
-      fuzzySearching,
-      [
-        {
-          name: 'name',
-          minSize: 2,
-        },
-      ],
-    );
+    const schemaStructure = { name: String };
+
+    interface TestSchema {
+      name?: string;
+    }
+
+    const pluginFields: Fields = [
+      {
+        name: 'name',
+        minSize: 2,
+      },
+    ];
+
+    const TestModel = createTestModel<TestSchema>('with callback and without options', {
+      schemaStructure,
+      pluginFields,
+    });
+    const Model = TestModel.model;
 
     beforeAll(async () => {
-      await db.seed(Model, { name: 'Joe' });
+      await TestModel.seed({ name: 'Joe' });
     });
 
     it('fuzzySearch() -> should return the results with callback', () => {
@@ -144,18 +147,28 @@ describe('fuzzySearch', () => {
   });
 
   describe('mongoose_fuzzy_searching with options and callback', () => {
-    const Model = db.createSchema('with options and callback', { name: String, lastName: String })(
-      fuzzySearching,
-      [
-        {
-          name: 'name',
-          minSize: 2,
-        },
-      ],
-    );
+    const schemaStructure = { name: String, lastName: String };
+
+    interface TestSchema {
+      name?: string;
+      lastName?: string;
+    }
+
+    const pluginFields: Fields = [
+      {
+        name: 'name',
+        minSize: 2,
+      },
+    ];
+
+    const TestModel = createTestModel<TestSchema>('with options and callback', {
+      schemaStructure,
+      pluginFields,
+    });
+    const Model = TestModel.model;
 
     beforeAll(async () => {
-      await db.seed(Model, { name: 'Joe', lastName: 'Doe' });
+      await TestModel.seed({ name: 'Joe', lastName: 'Doe' });
     });
 
     it('fuzzySearch() -> should not be able to find users when the options searches for `lastName` with value `test` and return the result with callback', () => {
@@ -181,7 +194,7 @@ describe('fuzzySearch', () => {
 
   describe('mongoose_fuzzy_searching with `keys` attribute in fields', () => {
     describe('mongoose_fuzzy_searching with array of objects attribute', () => {
-      const Model = db.createSchema('keys with array of objects attribute', {
+      const schemaStructure = {
         texts: [
           {
             title: String,
@@ -189,16 +202,32 @@ describe('fuzzySearch', () => {
             language: String,
           },
         ],
-      })(fuzzySearching, [
+      };
+
+      interface TestSchema {
+        texts: {
+          title: string;
+          description: string;
+          language: string;
+        }[];
+      }
+
+      const pluginFields: Fields = [
         {
           name: 'texts',
           escapeSpecialCharacters: false,
           keys: ['title', 'language'],
         },
-      ]);
+      ];
+
+      const TestModel = createTestModel<TestSchema>('keys with array of objects attribute', {
+        schemaStructure,
+        pluginFields,
+      });
+      const Model = TestModel.model;
 
       beforeAll(async () => {
-        await db.seed(Model, {
+        await TestModel.seed({
           texts: [
             {
               title: 'this is a title',
@@ -221,23 +250,39 @@ describe('fuzzySearch', () => {
     });
 
     describe('mongoose_fuzzy_searching with single object attribute', () => {
-      const Model = db.createSchema('keys with single object attribute', {
+      const schemaStructure = {
         title: {
           en: String,
           de: String,
           it: String,
         },
-      })(fuzzySearching, [
+      };
+
+      interface TestSchema {
+        title: {
+          en: string;
+          de: string;
+          it: string;
+        };
+      }
+
+      const pluginFields: Fields = [
         {
           name: 'title',
           escapeSpecialCharacters: false,
           keys: ['en', 'de', 'it'],
           minSize: 3,
         },
-      ]);
+      ];
+
+      const TestModel = createTestModel<TestSchema>('keys with single object attribute', {
+        schemaStructure,
+        pluginFields,
+      });
+      const Model = TestModel.model;
 
       beforeAll(async () => {
-        await db.seed(Model, {
+        await TestModel.seed({
           title: {
             en: 'start wars',
             de: 'Krieg der Sterne',
@@ -260,12 +305,24 @@ describe('fuzzySearch', () => {
 
   describe('mongoose_fuzzy_searching with `exact` option', () => {
     describe('mongoose_fuzzy_searching with array of objects attribute', () => {
-      const Model = db.createSchema('exact with array of objects attribute', {
+      const schemaStructure = {
         name: String,
-      })(fuzzySearching, ['name']);
+      };
+
+      interface TestSchema {
+        name: string;
+      }
+
+      const pluginFields: Fields = ['name'];
+
+      const TestModel = createTestModel<TestSchema>('exact with array of objects attribute', {
+        schemaStructure,
+        pluginFields,
+      });
+      const Model = TestModel.model;
 
       beforeAll(async () => {
-        await Model.insertMany([{ name: 'Peter Pan' }, { name: 'Peter Ofori-Quaye' }]);
+        await TestModel.seedMany([{ name: 'Peter Pan' }, { name: 'Peter Ofori-Quaye' }]);
       });
 
       it('fuzzySearch() -> should be able to find the title when the text is `Peter Pan`', async () => {
@@ -278,24 +335,38 @@ describe('fuzzySearch', () => {
     });
 
     describe('mongoose_fuzzy_searching with single object attribute', () => {
-      const Model = db.createSchema('exact with single object attribute', {
-        title: [
-          {
-            en: String,
-            de: String,
-            it: String,
-          },
-        ],
-      })(fuzzySearching, [
+      const schemaStructure = {
+        title: {
+          en: String,
+          de: String,
+          it: String,
+        },
+      };
+
+      interface TestSchema {
+        title: {
+          en: string;
+          de: string;
+          it: string;
+        };
+      }
+
+      const pluginFields: Fields = [
         {
           name: 'title',
           escapeSpecialCharacters: false,
           keys: ['en', 'de', 'it'],
         },
-      ]);
+      ];
+
+      const TestModel = createTestModel<TestSchema>('exact with single object attribute', {
+        schemaStructure,
+        pluginFields,
+      });
+      const Model = TestModel.model;
 
       beforeAll(async () => {
-        await db.seed(Model, {
+        await TestModel.seed({
           title: {
             en: 'start wars',
             de: 'Krieg der Sterne',
@@ -312,34 +383,43 @@ describe('fuzzySearch', () => {
   });
 
   describe('mongoose_fuzzy_searching should run user provided toObject & toJSON', () => {
-    const Model = db.createSchema(
-      'toObject and toJSON',
-      { name: String },
+    const schemaStructure = { name: String };
+
+    interface TestSchema {
+      name: string;
+      toObjectTest?: boolean;
+      toJSONTest?: boolean;
+    }
+
+    const pluginFields: Fields = [
       {
+        name: 'name',
+        minSize: 2,
+      },
+    ];
+
+    const TestModel = createTestModel<TestSchema>('toObject and toJSON', {
+      schemaStructure,
+      pluginFields,
+      pluginSchemaOptions: {
         toObject: {
           transform(doc, ret) {
-            // eslint-disable-next-line no-param-reassign
             ret.toObjectTest = true;
             return ret;
           },
         },
         toJSON: {
           transform(doc, ret) {
-            // eslint-disable-next-line no-param-reassign
             ret.toJSONTest = true;
             return ret;
           },
         },
       },
-    )(fuzzySearching, [
-      {
-        name: 'name',
-        minSize: 2,
-      },
-    ]);
+    });
+    const Model = TestModel.model;
 
     beforeAll(async () => {
-      await db.seed(Model, { name: 'Joe' });
+      await TestModel.seed({ name: 'Joe' });
     });
 
     it("Should run user provided toObject and fuzzy searching's toObject", async () => {
@@ -358,18 +438,23 @@ describe('fuzzySearch', () => {
   });
 
   describe('mongoose_fuzzy_searching with array of strings', () => {
-    const Model = db.createSchema('with array of strings', {
-      tags: [String],
-    })(fuzzySearching, ['tags']);
+    const schemaStructure = { tags: [String] };
+
+    interface TestSchema {
+      tags: string[];
+    }
+
+    const pluginFields: Fields = ['tags'];
+
+    const TestModel = createTestModel<TestSchema>('with array of strings', {
+      schemaStructure,
+      pluginFields,
+    });
+    const Model = TestModel.model;
 
     beforeAll(async () => {
-      await db.seed(Model, {
-        tags: ['nature', 'fire', 'beauty', 'tenten'],
-      });
-
-      await db.seed(Model, {
-        tags: ['test1', 'test2', 'test3'],
-      });
+      await TestModel.seed({ tags: ['nature', 'fire', 'beauty', 'tenten'] });
+      await TestModel.seed({ tags: ['test1', 'test2', 'test3'] });
     });
 
     it('fuzzySearch() -> should be able to find the tag when the text is `nature`', async () => {
@@ -385,18 +470,31 @@ describe('fuzzySearch', () => {
 
   describe('mongoose_fuzzy_searching pre middlewares', () => {
     describe('mongoose_fuzzy_searching update user with `findOneAndUpdate`', () => {
-      const Model = db.createSchema('pre update user with findOneAndUpdate', {
+      const schemaStructure = {
         name: String,
         age: Number,
-      })(fuzzySearching, [
+      };
+
+      interface TestSchema {
+        name: string;
+        age?: number;
+      }
+
+      const pluginFields: Fields = [
         {
           name: 'name',
           minSize: 2,
         },
-      ]);
+      ];
+
+      const TestModel = createTestModel<TestSchema>('pre update user with findOneAndUpdate', {
+        schemaStructure,
+        pluginFields,
+      });
+      const Model = TestModel.model;
 
       beforeAll(async () => {
-        const obj = await db.seed(Model, { name: 'Joe' });
+        const obj = await TestModel.seed({ name: 'Joe' });
         await Model.findOneAndUpdate({ _id: obj._id }, { age: 30 });
       });
 
@@ -417,18 +515,29 @@ describe('fuzzySearch', () => {
     });
 
     describe('mongoose_fuzzy_searching update user with `update`', () => {
-      const Model = db.createSchema('pre update user with update', { name: String })(
-        fuzzySearching,
-        [
-          {
-            name: 'name',
-            minSize: 2,
-          },
-        ],
-      );
+      const schemaStructure = {
+        name: String,
+      };
+
+      interface TestSchema {
+        name: string;
+      }
+
+      const pluginFields: Fields = [
+        {
+          name: 'name',
+          minSize: 2,
+        },
+      ];
+
+      const TestModel = createTestModel<TestSchema>('pre update user with update', {
+        schemaStructure,
+        pluginFields,
+      });
+      const Model = TestModel.model;
 
       beforeAll(async () => {
-        const obj = await db.seed(Model, { name: 'Joe' });
+        const obj = await TestModel.seed({ name: 'Joe' });
         await Model.update({ _id: obj._id }, { name: 'Someone' });
       });
 
@@ -449,18 +558,29 @@ describe('fuzzySearch', () => {
     });
 
     describe('mongoose_fuzzy_searching update user with `updateOne`', () => {
-      const Model = db.createSchema('pre update user with updateOne', { name: String })(
-        fuzzySearching,
-        [
-          {
-            name: 'name',
-            minSize: 2,
-          },
-        ],
-      );
+      const schemaStructure = {
+        name: String,
+      };
+
+      interface TestSchema {
+        name: string;
+      }
+
+      const pluginFields: Fields = [
+        {
+          name: 'name',
+          minSize: 2,
+        },
+      ];
+
+      const TestModel = createTestModel<TestSchema>('pre update user with updateOne', {
+        schemaStructure,
+        pluginFields,
+      });
+      const Model = TestModel.model;
 
       beforeAll(async () => {
-        const obj = await db.seed(Model, { name: 'Joe' });
+        const obj = await TestModel.seed({ name: 'Joe' });
         await Model.updateOne({ _id: obj._id }, { name: 'Someone' });
       });
 
@@ -481,15 +601,26 @@ describe('fuzzySearch', () => {
     });
 
     describe('mongoose_fuzzy_searching insert users with `insertMany`', () => {
-      const Model = db.createSchema('pre insert user with insertMany', { name: String })(
-        fuzzySearching,
-        [
-          {
-            name: 'name',
-            minSize: 2,
-          },
-        ],
-      );
+      const schemaStructure = {
+        name: String,
+      };
+
+      interface TestSchema {
+        name: string;
+      }
+
+      const pluginFields: Fields = [
+        {
+          name: 'name',
+          minSize: 2,
+        },
+      ];
+
+      const TestModel = createTestModel<TestSchema>('pre insert user with insertMany', {
+        schemaStructure,
+        pluginFields,
+      });
+      const Model = TestModel.model;
 
       beforeAll(async () => {
         await Model.insertMany([{ name: 'Vassilis' }, { name: 'Dimitris' }]);
@@ -507,18 +638,29 @@ describe('fuzzySearch', () => {
     });
 
     describe('mongoose_fuzzy_searching update users with `updateMany`', () => {
-      const Model = db.createSchema('pre update user with updateMany', { name: String })(
-        fuzzySearching,
-        [
-          {
-            name: 'name',
-            minSize: 2,
-          },
-        ],
-      );
+      const schemaStructure = {
+        name: String,
+      };
+
+      interface TestSchema {
+        name: string;
+      }
+
+      const pluginFields: Fields = [
+        {
+          name: 'name',
+          minSize: 2,
+        },
+      ];
+
+      const TestModel = createTestModel<TestSchema>('pre update user with updateMany', {
+        schemaStructure,
+        pluginFields,
+      });
+      const Model = TestModel.model;
 
       beforeAll(async () => {
-        await Model.insertMany([{ name: 'Vassilis' }, { name: 'Dimitris' }]);
+        await TestModel.seedMany([{ name: 'Vassilis' }, { name: 'Dimitris' }]);
         await Model.updateMany({ name: 'Vassilis' }, { name: 'Pallas' });
       });
 
@@ -535,27 +677,39 @@ describe('fuzzySearch', () => {
   });
 
   describe('mongoose_fuzzy_searching custom `pre` middlewares', () => {
-    const schema = { name: String, age: Number, skill: String };
+    const schemaStructure = { name: String, age: Number, skill: String };
+
+    interface TestSchema {
+      name: string;
+      age: number;
+      skill?: string;
+    }
+
+    const pluginFields: Fields = [
+      {
+        name: 'name',
+        minSize: 2,
+      },
+    ];
 
     it('should call `preSave`', async () => {
-      const preSave = jest.fn().mockImplementation(function () {
+      const preSave = jest.fn().mockImplementation(function (this: TestSchema) {
         this.skill = 'amazing';
       });
 
-      const Model = db.createSchema('custom pre preSave', schema)(
-        fuzzySearching,
-        [
+      const TestModel = createTestModel<TestSchema>('custom pre preSave', {
+        schemaStructure,
+        pluginFields,
+        middlewares: [
           {
-            name: 'name',
-            minSize: 2,
+            name: 'save',
+            fn: preSave,
           },
         ],
-        {
-          preSave,
-        },
-      );
+      });
+      const Model = TestModel.model;
 
-      await db.seed(Model, { name: 'Joe', age: 30 });
+      await TestModel.seed({ name: 'Joe', age: 30 });
 
       const result = await Model.fuzzySearch({ query: 'jo' });
       expect(result).toHaveLength(1);
@@ -564,22 +718,21 @@ describe('fuzzySearch', () => {
     });
 
     it('should call `preUpdate`', async () => {
-      const preUpdate = jest.fn().mockImplementation(function () {});
+      const preUpdate = jest.fn();
 
-      const Model = db.createSchema('custom pre preUpdate', schema)(
-        fuzzySearching,
-        [
+      const TestModel = createTestModel<TestSchema>('custom pre preUpdate', {
+        schemaStructure,
+        pluginFields,
+        middlewares: [
           {
-            name: 'name',
-            minSize: 2,
+            name: 'update',
+            fn: preUpdate,
           },
         ],
-        {
-          preUpdate,
-        },
-      );
+      });
+      const Model = TestModel.model;
 
-      const obj = await db.seed(Model, { name: 'Joe', age: 30 });
+      const obj = await TestModel.seed({ name: 'Joe', age: 30 });
       await Model.update({ _id: obj._id }, { skill: 'amazing' });
 
       const result = await Model.fuzzySearch({ query: 'jo' });
@@ -589,22 +742,21 @@ describe('fuzzySearch', () => {
     });
 
     it('should call `preFindOneAndUpdate`', async () => {
-      const preFindOneAndUpdate = jest.fn().mockImplementation(function () {});
+      const preFindOneAndUpdate = jest.fn();
 
-      const Model = db.createSchema('custom pre preFindOneAndUpdate', schema)(
-        fuzzySearching,
-        [
+      const TestModel = createTestModel<TestSchema>('custom pre preFindOneAndUpdate', {
+        schemaStructure,
+        pluginFields,
+        middlewares: [
           {
-            name: 'name',
-            minSize: 2,
+            name: 'findOneAndUpdate',
+            fn: preFindOneAndUpdate,
           },
         ],
-        {
-          preFindOneAndUpdate,
-        },
-      );
+      });
+      const Model = TestModel.model;
 
-      const obj = await db.seed(Model, { name: 'Joe', age: 30 });
+      const obj = await TestModel.seed({ name: 'Joe', age: 30 });
       await Model.findByIdAndUpdate(obj._id, { skill: 'amazing' });
 
       const result = await Model.fuzzySearch({ query: 'jo' });
@@ -614,53 +766,55 @@ describe('fuzzySearch', () => {
     });
 
     it('should call `preInsertMany`', async () => {
-      const preInsertMany = jest.fn().mockImplementation(function (docs) {
-        docs.forEach((doc) => {
+      const docs = [
+        { name: 'Joe', age: 30 },
+        { name: 'Doe', age: 26 },
+      ];
+
+      const Mock = jest.fn().mockImplementation(function (d: TestSchema[]) {
+        d.forEach((doc: TestSchema) => {
           doc.skill = 'amazing';
         });
       });
 
-      const Model = db.createSchema('custom pre preInsertMany', schema)(
-        fuzzySearching,
-        [
+      const preInsertMany = Mock.bind(docs, docs, docs);
+
+      const TestModel = createTestModel<TestSchema>('custom pre preInsertMany', {
+        schemaStructure,
+        pluginFields,
+        middlewares: [
           {
-            name: 'name',
-            minSize: 2,
+            name: 'insertMany',
+            fn: preInsertMany,
           },
         ],
-        {
-          preInsertMany,
-        },
-      );
+      });
+      const Model = TestModel.model;
 
-      await Model.insertMany([
-        { name: 'Joe', age: 30 },
-        { name: 'Doe', age: 26 },
-      ]);
+      await Model.insertMany(docs);
 
       const result = await Model.fuzzySearch({ query: 'jo' });
       expect(result).toHaveLength(1);
-      expect(preInsertMany).toHaveBeenCalledTimes(1);
+      expect(Mock).toHaveBeenCalledTimes(1);
       expect(result[0]).toHaveProperty('skill', 'amazing');
     });
 
     it('should call `preUpdateMany`', async () => {
-      const preUpdateMany = jest.fn().mockImplementation(function () {});
+      const preUpdateMany = jest.fn();
 
-      const Model = db.createSchema('custom pre preUpdateMany', schema)(
-        fuzzySearching,
-        [
+      const TestModel = createTestModel<TestSchema>('custom pre preUpdateMany', {
+        schemaStructure,
+        pluginFields,
+        middlewares: [
           {
-            name: 'name',
-            minSize: 2,
+            name: 'updateMany',
+            fn: preUpdateMany,
           },
         ],
-        {
-          preUpdateMany,
-        },
-      );
+      });
+      const Model = TestModel.model;
 
-      await Model.insertMany([
+      await TestModel.seedMany([
         { name: 'Joe', age: 30 },
         { name: 'Doe', age: 26 },
       ]);
@@ -672,22 +826,20 @@ describe('fuzzySearch', () => {
     });
 
     it('should call `preUpdateOne`', async () => {
-      const preUpdateOne = jest.fn().mockImplementation(function () {});
+      const preUpdateOne = jest.fn();
 
-      const Model = db.createSchema('custom pre preUpdateOne', schema)(
-        fuzzySearching,
-        [
+      const TestModel = createTestModel<TestSchema>('custom pre preUpdateOne', {
+        schemaStructure,
+        pluginFields,
+        middlewares: [
           {
-            name: 'name',
-            minSize: 2,
+            name: 'updateOne',
+            fn: preUpdateOne,
           },
         ],
-        {
-          preUpdateOne,
-        },
-      );
-
-      const obj = await db.seed(Model, { name: 'Joe', age: 30 });
+      });
+      const Model = TestModel.model;
+      const obj = await TestModel.seed({ name: 'Joe', age: 30 });
       await Model.updateOne({ _id: obj._id }, { skill: 'amazing' });
 
       const result = await Model.fuzzySearch({ query: 'jo' });
@@ -697,27 +849,30 @@ describe('fuzzySearch', () => {
     });
 
     it('should call `preSave` and `preUpdate`', async () => {
-      const preUpdate = jest.fn().mockImplementation(function () {});
-      const preSave = jest.fn().mockImplementation(function () {});
+      const preUpdate = jest.fn();
+      const preSave = jest.fn();
 
-      const Model = db.createSchema('custom pre preSave and preUpdate', schema)(
-        fuzzySearching,
-        [
+      const TestModel = createTestModel<TestSchema>('custom pre preSave and preUpdate', {
+        schemaStructure,
+        pluginFields,
+        middlewares: [
           {
-            name: 'name',
-            minSize: 2,
+            name: 'save',
+            fn: preSave,
+          },
+          {
+            name: 'update',
+            fn: preUpdate,
           },
         ],
-        {
-          preSave,
-          preUpdate,
-        },
-      );
+      });
+      const Model = TestModel.model;
+      const obj = await TestModel.seed({ name: 'Joe', age: 30 });
 
-      const obj = await db.seed(Model, { name: 'Joe', age: 30 });
       await Model.update({ _id: obj._id }, { skill: 'amazing' });
 
       const result = await Model.fuzzySearch({ query: 'jo' });
+
       expect(result).toHaveLength(1);
       expect(preSave).toHaveBeenCalledTimes(1);
       expect(preUpdate).toHaveBeenCalledTimes(1);
@@ -729,7 +884,7 @@ describe('fuzzySearch', () => {
     });
 
     it('should call promise', async () => {
-      const preSave = jest.fn().mockImplementation(async function () {
+      const preSave = jest.fn().mockImplementation(async function (this: TestSchema) {
         return new Promise((resolve) => {
           setTimeout(() => {
             this.skill = 'amazing';
@@ -738,20 +893,18 @@ describe('fuzzySearch', () => {
         });
       });
 
-      const Model = db.createSchema('custom pre preSave promise', schema)(
-        fuzzySearching,
-        [
+      const TestModel = createTestModel<TestSchema>('custom pre preSave promise', {
+        schemaStructure,
+        pluginFields,
+        middlewares: [
           {
-            name: 'name',
-            minSize: 2,
+            name: 'save',
+            fn: preSave,
           },
         ],
-        {
-          preSave,
-        },
-      );
-
-      await db.seed(Model, { name: 'Joe', age: 30 });
+      });
+      const Model = TestModel.model;
+      await TestModel.seed({ name: 'Joe', age: 30 });
 
       const result = await Model.fuzzySearch({ query: 'jo' });
       expect(result).toHaveLength(1);
@@ -761,22 +914,36 @@ describe('fuzzySearch', () => {
   });
 
   describe('mongoose_fuzzy_searching with query helper', () => {
-    const Model = db.createSchema('with query helper', { name: String, age: Number })(
-      fuzzySearching,
-      [
-        {
-          name: 'name',
-          minSize: 2,
-        },
-      ],
-    );
+    const schemaStructure = { name: String, age: Number };
+
+    interface TestSchema {
+      name: string;
+      age: number;
+    }
+
+    const pluginFields: Fields = [
+      {
+        name: 'name',
+        minSize: 2,
+      },
+    ];
+
+    const TestModel = createTestModel<TestSchema>('with query helper', {
+      schemaStructure,
+      pluginFields,
+    });
+    const Model = TestModel.model;
 
     beforeAll(async () => {
-      await db.seed(Model, { name: 'Joe', age: 30 });
+      await TestModel.seed({ name: 'Joe', age: 30 });
     });
 
     it('fuzzySearch() -> should return the results by chaing queries', async () => {
-      const result = await Model.find({ age: { $gte: 30 } }).fuzzySearch('jo');
+      const result = await Model.find(
+        { age: { $gte: 30 } },
+        confidenceScore,
+        pluginSort,
+      ).fuzzySearch('jo');
       expect(result).toHaveLength(1);
     });
   });

@@ -1,5 +1,6 @@
 Makefile
 .github/
+src/
 
 # CI
 .circleci/

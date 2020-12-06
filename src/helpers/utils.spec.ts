@@ -1,22 +1,16 @@
-const { replaceSymbols, isFunction, isObject, isString } = require('./utils');
+import { replaceSymbols, isFunction, isObject, isString } from './utils';
 
 describe('replaceSymbols', () => {
-  const replaceLanguageCharacters = (text) => text;
-
   it('should return `hello world` when the given string is `hello_world`', () => {
-    expect(replaceSymbols(replaceLanguageCharacters)('hello_world')).toBe('hello world');
+    expect(replaceSymbols('hello_world', false)).toBe('hello world');
   });
 
   it('should return `exampledomaincom` when the given string is `example@domain.com`', () => {
-    expect(replaceSymbols(replaceLanguageCharacters)('example@domain.com', true)).toBe(
-      'exampledomaincom',
-    );
+    expect(replaceSymbols('example@domain.com', true)).toBe('exampledomaincom');
   });
 
   it('should return `example@domain.com` when the given string is `example@domain.com`', () => {
-    expect(replaceSymbols(replaceLanguageCharacters)('example@domain.com')).toBe(
-      'example@domain.com',
-    );
+    expect(replaceSymbols('example@domain.com', false)).toBe('example@domain.com');
   });
 });
 
@@ -25,16 +19,12 @@ describe('isObject', () => {
     expect(isObject([])).toBeFalsy();
   });
 
-  it('should return false when the parameter is undefined', () => {
-    expect(isObject()).toBeFalsy();
-  });
-
   it('should return false when object is empty', () => {
     expect(isObject({})).toBeFalsy();
   });
 
   it('should return false when object is function', () => {
-    expect(isObject(() => {})).toBeFalsy();
+    expect(isObject(jest.fn)).toBeFalsy();
   });
 
   it('should return true when the parameter is an object', () => {
@@ -47,10 +37,6 @@ describe('isFunction', () => {
     expect(isFunction([])).toBeFalsy();
   });
 
-  it('should return false when the parameter is undefined', () => {
-    expect(isFunction()).toBeFalsy();
-  });
-
   it('should return false when the parameter is null', () => {
     expect(isFunction(null)).toBeFalsy();
   });
@@ -60,17 +46,13 @@ describe('isFunction', () => {
   });
 
   it('should return true when the parameter is a function', () => {
-    expect(isFunction(() => {})).toBeTruthy();
+    expect(isFunction(jest.fn)).toBeTruthy();
   });
 });
 
 describe('isString', () => {
   it('should return false when the parameter is array', () => {
     expect(isString([])).toBeFalsy();
-  });
-
-  it('should return false when the parameter is undefined', () => {
-    expect(isString()).toBeFalsy();
   });
 
   it('should return false when the parameter is null', () => {
