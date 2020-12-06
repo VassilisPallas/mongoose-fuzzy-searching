@@ -1,5 +1,6 @@
+import { HookNextFunction } from 'mongoose';
 import { createNGrams } from './db/fields';
-import { HookNextFunction, Fields, Attributes } from '../types';
+import { Fields, Attributes } from '../types';
 
 export const createNGramsMiddleware = (
   attributes: Attributes,

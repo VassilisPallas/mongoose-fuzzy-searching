@@ -1,13 +1,15 @@
+import { Schema } from 'mongoose';
+
 import { createFields, createNGrams, removeFuzzyElements } from './fields';
-import { MongooseSchema, Attributes, Fields } from '../../types';
+import { Attributes, Fields } from '../../types';
 
 jest.mock('../ngrams');
 
 describe('createFields', () => {
-  let schema: MongooseSchema;
+  let schema: Schema;
 
   beforeEach(() => {
-    schema = new MongooseSchema();
+    schema = new Schema();
   });
 
   it('should create the fields', () => {

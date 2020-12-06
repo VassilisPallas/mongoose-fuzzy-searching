@@ -6,15 +6,14 @@
   "files": [
     "lib/**/**/*",
     "LICENSE",
-    "README.md",
-    "typings/index.d.ts"
+    "README.md"
   ],
   "main": "lib/index.js",
-  "types": "typings/index.d.ts",
+  "types": "lib/index.d.ts",
   "scripts": {
     "lint:fix": "eslint --fix .",
-    "format": "prettier --write \"./**/*.{json,js,ts}\"",
-    "lint": "eslint --ext .js \"./**/*.{json,js,ts}\"",
+    "format": "prettier --write \"./**/*.{json,ts}\"",
+    "lint": "eslint --ext .ts \"./**/*.{json,ts}\"",
     "build": "tsc",
     "test:integration": "jest --colors --runInBand __tests__/**.test.ts",
     "test:unit": "jest --colors spec.ts",
@@ -29,7 +28,7 @@
     }
   },
   "lint-staged": {
-    "./**/**/*.{json,js}": [
+    "./**/**/*.{json,ts}": [
       "npm run lint",
       "npm run format"
     ]
@@ -71,5 +70,9 @@
     "ts-jest": "^26.4.3",
     "typescript": "^4.0.5"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@types/mongoose": "^5.7.37",
+    "mongoose": "^5.10.11",
+    "typescript": "^4.0.5"
+  }
 }

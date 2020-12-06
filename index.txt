@@ -21,6 +21,7 @@ declare module 'mongoose-fuzzy-searching' {
   type MongooseCriteria = mongoose.MongooseFilterQuery<any> | mongoose.Query<any>;
   type MongooseCallback = (err: any, res: any[]) => void;
   type MongooseModel = mongoose.Model<any, any>;
+  type MongooseSchema = mongoose.Schema;
   type MongooseSchemaOptions = mongoose.SchemaOptions;
   type MongooseDocument = mongoose.Document;
   type MongooseQuery<T> = mongoose.Query<T>;
@@ -105,4 +106,6 @@ declare module 'mongoose-fuzzy-searching' {
     extends mongoose.Model<T, MongooseQueryHelpers<T>> {
     fuzzySearch(...args: StaticFuzzyParameters): MongooseQuery<T>;
   }
+
+  export default function (schema: MongooseSchema, { fields, options }: PluginSchemaOptions): void;
 }

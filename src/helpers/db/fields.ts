@@ -1,13 +1,7 @@
+import { Schema } from 'mongoose';
 import { isString, prepareNgrams } from '../utils';
 import { makeNGrams } from '../ngrams';
-import {
-  MongooseSchema,
-  FieldObject,
-  Attributes,
-  Fields,
-  FieldIndexes,
-  KeyFieldObject,
-} from '../../types';
+import { FieldObject, Attributes, Fields, FieldIndexes, KeyFieldObject } from '../../types';
 
 interface Options {
   default: string | [];
@@ -46,7 +40,7 @@ class Create extends FieldCreator {
 
   private _weights: FieldIndexes['weights'] = {};
 
-  constructor(private schema: MongooseSchema) {
+  constructor(private schema: Schema) {
     super();
   }
 
@@ -59,7 +53,7 @@ class Create extends FieldCreator {
 
   private addToSchema = (name: string) => {
     return {
-      [`${name}_fuzzy`]: this.createSchemaObject([MongooseSchema.Types.String], {
+      [`${name}_fuzzy`]: this.createSchemaObject([Schema.Types.String], {
         default: '',
         index: false,
       }),
@@ -68,7 +62,7 @@ class Create extends FieldCreator {
 
   private addArrayToSchema = (name: string) => {
     return {
-      [`${name}_fuzzy`]: this.createSchemaObject(MongooseSchema.Types.Mixed, {
+      [`${name}_fuzzy`]: this.createSchemaObject(Schema.Types.Mixed, {
         default: [],
         index: false,
       }),
@@ -105,7 +99,7 @@ class Create extends FieldCreator {
 }
 
 class Remove extends FieldCreator {
-  constructor(private _schema: MongooseSchema) {
+  constructor(private _schema: Schema) {
     super();
   }
 
@@ -233,15 +227,12 @@ class Generate extends FieldCreator {
   }
 }
 
-export const createFields = (schema: MongooseSchema, fields: Fields): FieldIndexes => {
+export const createFields = (schema: Schema, fields: Fields): FieldIndexes => {
   const create = new Create(schema).createByFields(fields);
   return { indexes: create.indexes, weights: create.weights };
 };
 
-export const removeFuzzyElements = (fields: Fields) => (
-  _doc: any,
-  ret: any,
-): MongooseSchema<any> => {
+export const removeFuzzyElements = (fields: Fields) => (_doc: any, ret: any): Schema<any> => {
   return new Remove(ret).createByFields(fields).schema;
 };
 

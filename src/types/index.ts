@@ -1,26 +1,10 @@
-import {
-  Schema as MongooseSchema,
-  SchemaOptions as MongooseSchemaOptions,
-  HookNextFunction,
-  DocumentToObjectOptions,
-  Query as MongooseQuery,
-  FilterQuery as MongooseFilterQuery,
-  Model,
-  Document as MongooseDocument,
-} from 'mongoose';
+import * as mongoose from 'mongoose';
 
 type NonEmptyArray<T> = T[] & { 0: T };
 
-export type MongooseCriteria = MongooseFilterQuery<any> | MongooseQuery<any>;
+export type MongooseCriteria = mongoose.FilterQuery<any> | mongoose.Query<any>;
+export type MongooseModel = mongoose.Model<any, any>;
 export type MongooseCallback = (err: any, res: any[]) => void;
-export type MongooseModel = Model<any, any>;
-export {
-  MongooseSchema,
-  MongooseSchemaOptions,
-  HookNextFunction,
-  DocumentToObjectOptions,
-  MongooseFilterQuery,
-};
 
 export type Attributes = Record<string, any> | Record<string, any>[];
 
@@ -54,8 +38,8 @@ export type Fields = Array<string | FieldObject>;
 export type PluginSchemaOptions = {
   fields: Fields;
   options?: {
-    toJSON?: MongooseSchemaOptions['toJSON'];
-    toObject?: MongooseSchemaOptions['toObject'];
+    toJSON?: mongoose.SchemaOptions['toJSON'];
+    toObject?: mongoose.SchemaOptions['toObject'];
   };
 };
 
@@ -94,11 +78,11 @@ export type StaticFuzzyReturn = QueryFuzzyReturn & {
 
 export type FuzzyParameters = StaticFuzzyParameters | QueryFuzzyParameters;
 
-export interface MongooseQueryHelpers<T extends MongooseDocument> {
-  fuzzySearch(...args: StaticFuzzyParameters): MongooseQuery<T>;
+export interface MongooseQueryHelpers<T extends mongoose.Document> {
+  fuzzySearch(...args: StaticFuzzyParameters): mongoose.Query<T>;
 }
 
-export interface MongoosePluginModel<T extends MongooseDocument>
-  extends Model<T, MongooseQueryHelpers<T>> {
-  fuzzySearch(...args: StaticFuzzyParameters): MongooseQuery<T>;
+export interface MongoosePluginModel<T extends mongoose.Document>
+  extends mongoose.Model<T, MongooseQueryHelpers<T>> {
+  fuzzySearch(...args: StaticFuzzyParameters): mongoose.Query<T>;
 }

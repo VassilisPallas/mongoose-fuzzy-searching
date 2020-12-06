@@ -1,5 +1,6 @@
+import { DocumentToObjectOptions, SchemaOptions } from 'mongoose';
 import { setTransformers } from './schema';
-import { Fields, DocumentToObjectOptions, MongooseSchemaOptions } from '../../types';
+import { Fields } from '../../types';
 
 import { removeFuzzyElements } from './fields';
 
@@ -38,7 +39,7 @@ describe('setTransformers', () => {
         transform: jest.fn(),
       };
 
-      const options: MongooseSchemaOptions = {
+      const options: SchemaOptions = {
         [overridedOption]: existedOptions,
       };
 
@@ -64,7 +65,7 @@ describe('setTransformers', () => {
       transform: jest.fn(),
     };
 
-    const options: MongooseSchemaOptions = {
+    const options: SchemaOptions = {
       'toJSON': existedToJSON,
       'toObject': existedToObject,
     };

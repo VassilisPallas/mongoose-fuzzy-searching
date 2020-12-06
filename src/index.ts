@@ -1,3 +1,5 @@
+import { Schema } from 'mongoose';
+
 import {
   createFields,
   createNGramsMiddleware,
@@ -6,17 +8,12 @@ import {
   StaticFuzzySearch,
 } from './helpers';
 
-import {
-  MongooseSchema,
-  PluginSchemaOptions,
-  StaticFuzzyParameters,
-  QueryFuzzyParameters,
-} from './types';
+import { PluginSchemaOptions, StaticFuzzyParameters, QueryFuzzyParameters } from './types';
 
 export { confidenceScore, sort } from './helpers/db/search';
 export { MongoosePluginModel } from './types';
 
-export default function (schema: MongooseSchema, { fields, options }: PluginSchemaOptions): void {
+export default function (schema: Schema, { fields, options }: PluginSchemaOptions): void {
   const { indexes, weights } = createFields(schema, fields);
   const { toJSON, toObject } = setTransformers(fields, options);
 

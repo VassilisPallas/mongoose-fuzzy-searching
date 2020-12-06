@@ -24,6 +24,7 @@ endif
 .PHONY: publish
 publish: ## Publish to npm
 	@[ "$(NPM_TOKEN)" ] || (echo ">> npm token is not set"; exit 1)
+	npm run build
 	echo //registry.npmjs.org/:_authToken="$(NPM_TOKEN)" > ~/.npmrc
 	npm publish
 

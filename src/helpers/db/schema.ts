@@ -1,4 +1,5 @@
-import { MongooseSchemaOptions, DocumentToObjectOptions, Fields } from '../../types';
+import { DocumentToObjectOptions, SchemaOptions } from 'mongoose';
+import { Fields } from '../../types';
 
 import { isFunction } from '../utils';
 import { removeFuzzyElements } from './fields';
@@ -18,7 +19,7 @@ const tranformer = (fields: Fields) => (docToObj?: DocumentToObjectOptions) => (
 
 export const setTransformers = (
   fields: Fields,
-  options?: MongooseSchemaOptions,
+  options?: SchemaOptions,
 ): {
   toObject: DocumentToObjectOptions;
   toJSON: DocumentToObjectOptions;
