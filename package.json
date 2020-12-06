@@ -4,7 +4,10 @@
   "author": "Vasileios Pallas <vspallas@gmail.com>",
   "description": "Mongoose fuzzy searching plugin",
   "files": [
-    "lib/**/*"
+    "lib/**/**/*",
+    "LICENSE",
+    "README.md",
+    "typings/index.d.ts"
   ],
   "main": "lib/index.js",
   "types": "typings/index.d.ts",
@@ -13,8 +16,8 @@
     "format": "prettier --write \"./**/*.{json,js,ts}\"",
     "lint": "eslint --ext .js \"./**/*.{json,js,ts}\"",
     "build": "tsc",
-    "test:integration": "jest --colors --runInBand __tests__/**.test.js",
-    "test:unit": "jest --colors spec.js",
+    "test:integration": "jest --colors --runInBand __tests__/**.test.ts",
+    "test:unit": "jest --colors spec.ts",
     "test": "jest --colors --runInBand",
     "test:watch": "npm test -- --watch",
     "test:unit:watch": "npm run test:unit --watch",

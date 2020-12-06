@@ -9,6 +9,8 @@ import {
   Document as MongooseDocument,
 } from 'mongoose';
 
+type NonEmptyArray<T> = T[] & { 0: T };
+
 export type MongooseCriteria = MongooseFilterQuery<any> | MongooseQuery<any>;
 export type MongooseCallback = (err: any, res: any[]) => void;
 export type MongooseModel = Model<any, any>;
@@ -28,11 +30,11 @@ export type FieldObject = {
   weight?: number;
   prefixOnly?: boolean;
   escapeSpecialCharacters?: boolean;
-  keys?: string[] & { 0: string };
+  keys?: NonEmptyArray<string>;
 };
 
 export type KeyFieldObject = FieldObject & {
-  keys: string[] & { 0: string };
+  keys: NonEmptyArray<string>;
 };
 
 export type FieldIndexes = {
