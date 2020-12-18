@@ -13,7 +13,7 @@ import { PluginSchemaOptions, StaticFuzzyParameters, QueryFuzzyParameters } from
 export { confidenceScore, sort } from './helpers/db/search';
 export { MongoosePluginModel } from './types';
 
-export default function (schema: Schema, { fields, options }: PluginSchemaOptions): void {
+const plugin = function (schema: Schema, { fields, options }: PluginSchemaOptions): void {
   const { indexes, weights } = createFields(schema, fields);
   const { toJSON, toObject } = setTransformers(fields, options);
 
@@ -52,4 +52,6 @@ export default function (schema: Schema, { fields, options }: PluginSchemaOption
   schema.query.fuzzySearch = function (...args: QueryFuzzyParameters) {
     return new QueryFuzzySearch(...args).search(this);
   };
-}
+};
+
+export default plugin;

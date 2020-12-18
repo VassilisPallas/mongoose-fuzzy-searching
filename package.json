@@ -9,7 +9,7 @@
     "README.md"
   ],
   "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "types": "index.d.ts",
   "scripts": {
     "lint:fix": "eslint --fix .",
     "format": "prettier --write \"./**/*.{json,ts}\"",
