@@ -86,7 +86,7 @@ function fuzzySearch(...args) {
 
   const { exact, queryString } = getArgs(queryArgs[0]);
   if (!queryString) {
-    return this.find();
+    return this.find(queryArgs[1]);
   }
 
   const { checkPrefixOnly, defaultNgamMinSize } = getDefaultValues(queryArgs[0]);
