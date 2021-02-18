@@ -61,6 +61,11 @@ describe('fuzzySearch', () => {
       const result = await Model.fuzzySearch('');
       expect(result).toHaveLength(1);
     });
+    
+    it('fuzzySearch() -> should find no users with empty string as first parameter and excluding all results as second parameter', async () => {
+      const result = await Model.fuzzySearch('', { _id: null });
+      expect(result).toHaveLength(0);
+    });
 
     it('fuzzySearch() -> should find one user with string as first parameter', async () => {
       const result = await Model.fuzzySearch('jo');
