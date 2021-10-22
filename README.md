@@ -8,25 +8,29 @@ This code is based on [this article](https://medium.com/xeneta/fuzzy-search-with
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FVassilisPallas%2Fmongoose-fuzzy-searching.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FVassilisPallas%2Fmongoose-fuzzy-searching?ref=badge_shield)
 
-- [Features](#features)
-- [Install](#install)
-- [Getting started](#getting-started)
-  - [Initialize plugin](#initialize-plugin)
-  - [Plugin options](#plugin-options)
-    - [Fields](#fields)
-      - [String field](#string-field)
-      - [Object field](#object-field)
-    - [Middlewares](#middlewares)
-- [Query parameters](#query-parameters)
-  - [Instance method](#instance-method)
-  - [Query helper](#query-helper)
-- [Working with pre-existing data](#working-with-pre-existing-data)
-  - [Update all pre-existing documents with ngrams](#update-all-pre-existing-documents-with-ngrams)
-  - [Delete old ngrams from all documents](#delete-old-ngrams-from-all-documents)
-- [Testing and code coverage](#testing-and-code-coverage)
-  - [All tests](#all-tests)
-  - [Available test suites](#available-test-suites)
-- [License](#license)
+- [Mongoose Fuzzy Searching](#mongoose-fuzzy-searching)
+  - [Features](#features)
+  - [Install](#install)
+  - [Getting started](#getting-started)
+    - [Initialize plugin](#initialize-plugin)
+    - [Plugin options](#plugin-options)
+      - [Fields](#fields)
+        - [String field](#string-field)
+        - [Object field](#object-field)
+      - [Middlewares](#middlewares)
+  - [Query parameters](#query-parameters)
+    - [Instance method](#instance-method)
+    - [Query helper](#query-helper)
+  - [Working with pre-existing data](#working-with-pre-existing-data)
+    - [Update all pre-existing documents with ngrams](#update-all-pre-existing-documents-with-ngrams)
+    - [Delete old ngrams from all documents](#delete-old-ngrams-from-all-documents)
+  - [Typescript support](#typescript-support)
+  - [Testing and code coverage](#testing-and-code-coverage)
+    - [All tests](#all-tests)
+    - [Available test suites](#available-test-suites)
+      - [unit tests](#unit-tests)
+      - [Integration tests](#integration-tests)
+  - [License](#license)
 
 ## Features
 
@@ -377,6 +381,29 @@ cursor.next(function (error, doc) {
   const $unset = attrs.reduce((acc, attr) => ({ ...acc, [`${attr}_fuzzy`]: 1 }), {});
   return Model.findByIdAndUpdate(data._id, { $unset }, { new: true, strict: false });
 });
+```
+
+## Typescript support
+
+```typescript
+import { Document, Error, model, Schema } from "mongoose";
+import fuzzySearching, { MongooseFuzzyModel } from "mongoose-fuzzy-searching";
+
+interface User extends Document {
+  firstName: string;
+  lastName: string;
+  email: string;
+  age: number;
+}
+const UserSchema = new Schema<User>({
+  firstName: String,
+  lastName: String,
+  email: String,
+  age: Number,
+});
+
+UserSchema.plugin(mongoose_fuzzy_searching, { fields: ['firstName', 'lastName'] });
+const UserModel = model<User>("user", UserSchema) as MongooseFuzzyModel<User>;
 ```
 
 ## Testing and code coverage
