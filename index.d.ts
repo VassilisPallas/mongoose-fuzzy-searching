@@ -1,5 +1,11 @@
 declare module "mongoose-fuzzy-searching" {
-  import { Document, Model, Schema } from "mongoose";
+  import {
+    CallbackError,
+    Document,
+    FilterQuery,
+    Model,
+    Schema,
+  } from "mongoose";
 
   export interface MongooseFuzzyOptions<T> {
     fields: (T extends Object ? keyof T : string)[];
@@ -8,7 +14,7 @@ declare module "mongoose-fuzzy-searching" {
   export interface MongooseFuzzyModel<T extends Document, QueryHelpers = {}>
     extends Model<T, QueryHelpers> {
     fuzzySearch(
-      search:
+      query:
         | String
         | {
             query: string;
@@ -16,8 +22,8 @@ declare module "mongoose-fuzzy-searching" {
             prefixOnly: boolean;
             exact: boolean;
           },
-      filter?: Object,
-      callBack?: (err: any, data: Model<T, QueryHelpers>[]) => void
+      filter?: FilterQuery<T>,
+      callBack?: (err: CallbackError, data: Model<T, QueryHelpers>[]) => void
     ): DocumentQuery<T[], T, QueryHelpers>;
   }
 
